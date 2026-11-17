@@ -55,7 +55,7 @@ En la pantalla de ingreso, los botones «Conductor» y «Administrador» llenan 
 
 ## Tecnologías
 
-React Native 0.86, Expo SDK 57, expo-router (navegación por pestañas), React Native Reanimated 4, Gesture Handler, Leaflet con mapas de OpenStreetMap/CARTO (sin llave de API) dentro de `react-native-webview`, TypeScript estricto.
+React Native 0.86, Expo SDK 57, expo-router (navegación por pestañas), React Native Reanimated 4, Gesture Handler, Leaflet con mapas de OpenStreetMap (sin llave de API) dentro de `react-native-webview`, TypeScript estricto.
 
 ## Estructura
 

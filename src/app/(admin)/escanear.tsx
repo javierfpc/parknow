@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
 import { useIsFocused } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Linking, StyleSheet, View } from 'react-native';
+import { Linking, Platform, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { Easing, FadeInDown, FadeOut, useAnimatedStyle, useSharedValue, withRepeat, withTiming, ZoomIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -14,9 +14,13 @@ import { useParqueaderos } from '@/context/parking-context';
 import { useReservas, validarCodigo, type ResultadoValidacion } from '@/context/reservations-context';
 import { formatoHora } from '@/lib/parking';
 import { vibrar } from '@/services/haptics';
+import { CLAVES, guardarJSON, leerJSON } from '@/services/storage';
 import { radius, spacing, useTheme } from '@/theme';
 
 const MARCO = 250;
+// Validación de plataforma: en la web (Chrome en Windows, Firefox, Safari) la cámara no lee QR,
+// así que allí se pega el texto del código para validarlo con la misma lógica.
+const ES_WEB = Platform.OS === 'web';
 
 export default function EscanearScreen() {
   const { colors } = useTheme();
@@ -28,7 +32,15 @@ export default function EscanearScreen() {
   const [permiso, pedirPermiso] = useCameraPermissions();
   const [linterna, setLinterna] = useState(false);
   const [resultado, setResultado] = useState<ResultadoValidacion | null>(null);
+  const [codigoManual, setCodigoManual] = useState('');
   const bloqueado = useRef(false);
+  // Sin servidor, el celular del administrador recuerda qué códigos ya dejó entrar.
+  const usados = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    leerJSON<string[]>(CLAVES.qrUsados, []).then((ids) => {
+      usados.current = new Set(ids);
+    });
+  }, []);
 
   const barrido = useSharedValue(0);
   useEffect(() => {
@@ -42,13 +54,20 @@ export default function EscanearScreen() {
     const r = validarCodigo(data, usuario.parqueaderoId);
     if (r.valido) {
       const ya = reservas.find((x) => x.id === r.reservaId);
-      if (ya?.estado === 'usada') {
-        setResultado({ valido: false, motivo: 'Este código ya se usó.' });
+      let motivo: string | null = null;
+      if (usados.current.has(r.reservaId) || ya?.estado === 'usada') motivo = 'Este código ya se usó.';
+      else if (ya?.estado === 'cancelada') motivo = 'Esta reserva fue cancelada.';
+      else if (ya?.estado === 'vencida') motivo = 'La reserva ya venció.';
+      // moverCupo devuelve false si no queda cupo: solo se registra la entrada si sí cabía.
+      else if (!moverCupo(usuario.parqueaderoId, 1)) motivo = 'El parqueadero está lleno.';
+      if (motivo) {
+        setResultado({ valido: false, motivo });
         vibrar.error();
         return;
       }
+      usados.current.add(r.reservaId);
+      guardarJSON(CLAVES.qrUsados, [...usados.current]);
       if (ya) marcarUsada(ya.id);
-      moverCupo(usuario.parqueaderoId, 1);
       vibrar.exito();
     } else {
       vibrar.error();
@@ -58,12 +77,13 @@ export default function EscanearScreen() {
 
   const otro = () => {
     setResultado(null);
+    setCodigoManual('');
     bloqueado.current = false;
   };
 
-  if (!permiso) return <View style={{ flex: 1, backgroundColor: '#000' }} />;
+  if (!ES_WEB && !permiso) return <View style={{ flex: 1, backgroundColor: '#000' }} />;
 
-  if (!permiso.granted) {
+  if (!ES_WEB && !permiso?.granted) {
     return (
       <View style={[styles.permiso, { backgroundColor: colors.background, paddingTop: insets.top }]}>
         <Animated.View entering={ZoomIn.springify()} style={[styles.permisoIcono, { backgroundColor: colors.surfaceAlt }]}>
@@ -76,11 +96,11 @@ export default function EscanearScreen() {
           Necesitamos la cámara para validar la entrada de los conductores. No guardamos fotos.
         </Text>
         <Button
-          titulo={permiso.canAskAgain ? 'Permitir cámara' : 'Abrir ajustes'}
+          titulo={permiso?.canAskAgain ? 'Permitir cámara' : 'Abrir ajustes'}
           icono="camera"
           grande
           style={{ alignSelf: 'stretch' }}
-          onPress={() => (permiso.canAskAgain ? pedirPermiso() : Linking.openSettings())}
+          onPress={() => (permiso?.canAskAgain ? pedirPermiso() : Linking.openSettings())}
         />
       </View>
     );
@@ -88,7 +108,7 @@ export default function EscanearScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#000' }}>
-      {enfocada && (
+      {enfocada && !ES_WEB && (
         <CameraView
           style={StyleSheet.absoluteFill}
           facing="back"
@@ -103,7 +123,7 @@ export default function EscanearScreen() {
           <Text variant="title" style={{ color: '#FFFFFF' }}>
             Validar reserva
           </Text>
-          <Text style={{ color: 'rgba(255,255,255,0.8)' }}>Apunta al código QR del conductor</Text>
+          <Text style={{ color: 'rgba(255,255,255,0.8)' }}>{ES_WEB ? 'Pega el texto del código QR del conductor' : 'Apunta al código QR del conductor'}</Text>
         </View>
 
         <View style={styles.marco}>
@@ -113,13 +133,30 @@ export default function EscanearScreen() {
           {!resultado && <Animated.View style={[styles.laser, laser]} />}
         </View>
 
-        <PressableScale
-          onPress={() => setLinterna((l) => !l)}
-          style={[styles.linterna, { backgroundColor: linterna ? '#FFFFFF' : 'rgba(255,255,255,0.18)' }]}
-          accessibilityLabel={linterna ? 'Apagar linterna' : 'Encender linterna'}
-        >
-          <Ionicons name={linterna ? 'flashlight' : 'flashlight-outline'} size={24} color={linterna ? '#03045E' : '#FFFFFF'} />
-        </PressableScale>
+        {ES_WEB ? (
+          !resultado && (
+            <View style={styles.manual}>
+              <TextInput
+                value={codigoManual}
+                onChangeText={setCodigoManual}
+                placeholder="PARKNOW|ABC123|p1|…"
+                placeholderTextColor="rgba(255,255,255,0.5)"
+                autoCapitalize="characters"
+                style={[styles.campo, { borderColor: colors.border }]}
+                accessibilityLabel="Código de la reserva"
+              />
+              <Button titulo="Validar" icono="checkmark" onPress={() => alLeer({ data: codigoManual.trim() } as BarcodeScanningResult)} />
+            </View>
+          )
+        ) : (
+          <PressableScale
+            onPress={() => setLinterna((l) => !l)}
+            style={[styles.linterna, { backgroundColor: linterna ? '#FFFFFF' : 'rgba(255,255,255,0.18)' }]}
+            accessibilityLabel={linterna ? 'Apagar linterna' : 'Encender linterna'}
+          >
+            <Ionicons name={linterna ? 'flashlight' : 'flashlight-outline'} size={24} color={linterna ? '#03045E' : '#FFFFFF'} />
+          </PressableScale>
+        )}
       </View>
 
       {resultado && (
@@ -149,6 +186,8 @@ export default function EscanearScreen() {
 const B = 4;
 const L = 34;
 const styles = StyleSheet.create({
+  manual: { alignSelf: 'stretch', marginHorizontal: spacing.xl, gap: spacing.md },
+  campo: { color: '#FFFFFF', borderWidth: 1, borderRadius: radius.md, paddingHorizontal: spacing.lg, paddingVertical: spacing.md, backgroundColor: 'rgba(255,255,255,0.08)' },
   permiso: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xxl, gap: spacing.lg },
   permisoIcono: { width: 96, height: 96, borderRadius: 48, alignItems: 'center', justifyContent: 'center' },
   capa: { alignItems: 'center', justifyContent: 'space-between', paddingBottom: 130, backgroundColor: 'rgba(0,0,0,0.35)' },

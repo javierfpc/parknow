@@ -21,12 +21,17 @@ export async function detectarBiometria(): Promise<Biometria> {
 
 export async function autenticar(motivo: string): Promise<boolean> {
   if (Platform.OS === 'web') return true;
-  const resultado = await LocalAuthentication.authenticateAsync({
-    promptMessage: motivo,
-    cancelLabel: 'Cancelar',
-    // En Android se permite el PIN o patrón como respaldo; en iOS, el código del equipo.
-    disableDeviceFallback: false,
-    fallbackLabel: 'Usar código',
-  });
-  return resultado.success;
+  try {
+    const resultado = await LocalAuthentication.authenticateAsync({
+      promptMessage: motivo,
+      cancelLabel: 'Cancelar',
+      // En Android se permite el PIN o patrón como respaldo; en iOS, el código del equipo.
+      disableDeviceFallback: false,
+      fallbackLabel: 'Usar código',
+    });
+    return resultado.success;
+  } catch {
+    // Biometría bloqueada por intentos o sin permiso de Face ID: se trata como no verificada.
+    return false;
+  }
 }

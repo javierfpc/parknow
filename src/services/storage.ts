@@ -45,4 +45,5 @@ export const CLAVES = {
   reservas: 'parknow.reservas',
   favoritos: 'parknow.favoritos',
   onboarding: 'parknow.onboarding',
+  qrUsados: 'parknow.qr-usados',
 } as const;

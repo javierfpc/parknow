@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { calcularTotal } from '@/lib/parking';
-import { notificarReservaConfirmada } from '@/services/notifications';
+import { cancelarRecordatorio, notificarReservaConfirmada } from '@/services/notifications';
 import { CLAVES, guardarJSON, leerJSON } from '@/services/storage';
 import type { Parqueadero, Reserva } from '@/types';
 
@@ -18,22 +18,29 @@ type ReservationsContextType = {
 const ReservationsContext = createContext<ReservationsContextType | undefined>(undefined);
 
 /** Una reserva activa vence cuando termina el tiempo reservado. */
-function conEstadoActual(r: Reserva): Reserva {
+function conEstadoActual(r: Reserva, ahora = Date.now()): Reserva {
   if (r.estado !== 'activa') return r;
   const fin = new Date(r.llegada).getTime() + r.horas * 3600_000;
-  return Date.now() > fin ? { ...r, estado: 'vencida' } : r;
+  return ahora > fin ? { ...r, estado: 'vencida' } : r;
 }
 
 export function ReservationsProvider({ children }: { children: ReactNode }) {
   const [reservas, setReservas] = useState<Reserva[]>([]);
+  // Reloj interno: hace que una reserva pase a «vencida» aunque la app siga abierta.
+  const [ahora, setAhora] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setAhora(Date.now()), 30_000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
-    leerJSON<Reserva[]>(CLAVES.reservas, []).then((r) => setReservas(r.map(conEstadoActual)));
+    leerJSON<Reserva[]>(CLAVES.reservas, []).then((r) => setReservas(r.map((x) => conEstadoActual(x))));
   }, []);
 
   const persistir = useCallback((fn: (r: Reserva[]) => Reserva[]) => {
     setReservas((actual) => {
-      const nuevo = fn(actual);
+      // Se parte del estado real: así una reserva vencida no queda luego como «cancelada».
+      const nuevo = fn(actual.map((x) => conEstadoActual(x)));
       guardarJSON(CLAVES.reservas, nuevo);
       return nuevo;
     });
@@ -54,16 +61,25 @@ export function ReservationsProvider({ children }: { children: ReactNode }) {
         creadaEn: new Date().toISOString(),
         codigo: [PREFIJO_QR, id, p.id, llegada.toISOString(), horas].join('|'),
       };
-      // Solo una reserva activa a la vez.
-      persistir((r) => [reserva, ...r.map((x) => (x.estado === 'activa' ? { ...x, estado: 'cancelada' as const } : x))]);
-      await notificarReservaConfirmada(p.nombre, llegada);
+      // Solo una reserva activa a la vez: la anterior se cancela junto con su recordatorio.
+      persistir((r) =>
+        [reserva, ...r.map((x) => {
+          if (x.estado !== 'activa') return x;
+          cancelarRecordatorio(x.id);
+          return { ...x, estado: 'cancelada' as const };
+        })],
+      );
+      await notificarReservaConfirmada(p.nombre, llegada, id);
       return reserva;
     },
     [persistir],
   );
 
   const cancelar = useCallback(
-    (id: string) => persistir((r) => r.map((x) => (x.id === id ? { ...x, estado: 'cancelada' } : x))),
+    (id: string) => {
+      cancelarRecordatorio(id);
+      persistir((r) => r.map((x) => (x.id === id ? { ...x, estado: 'cancelada' } : x)));
+    },
     [persistir],
   );
   const marcarUsada = useCallback(
@@ -72,9 +88,10 @@ export function ReservationsProvider({ children }: { children: ReactNode }) {
   );
 
   const valor = useMemo(() => {
-    const actuales = reservas.map(conEstadoActual);
+    // `ahora` cambia cada 30 s para recalcular qué reservas ya vencieron.
+    const actuales = reservas.map((r) => conEstadoActual(r, ahora));
     return { reservas: actuales, activa: actuales.find((r) => r.estado === 'activa') ?? null, crear, cancelar, marcarUsada };
-  }, [reservas, crear, cancelar, marcarUsada]);
+  }, [reservas, ahora, crear, cancelar, marcarUsada]);
 
   return <ReservationsContext.Provider value={valor}>{children}</ReservationsContext.Provider>;
 }

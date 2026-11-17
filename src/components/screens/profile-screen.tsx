@@ -3,7 +3,7 @@ import * as Device from 'expo-device';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Accelerometer } from 'expo-sensors';
 import { useEffect, useState } from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -13,6 +13,7 @@ import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/context/auth-context';
 import { useReservas } from '@/context/reservations-context';
 import { autenticar, detectarBiometria, type Biometria } from '@/services/biometrics';
+import { confirmar } from '@/services/confirm';
 import { vibrar } from '@/services/haptics';
 import { pedirPermiso } from '@/services/notifications';
 import { radius, spacing, useTheme } from '@/theme';
@@ -55,11 +56,10 @@ export function ProfileScreen() {
     toast(ok ? 'Recibirás recordatorios de tus reservas' : 'Permiso de notificaciones denegado', ok ? 'exito' : 'error');
   };
 
-  const salir = () =>
-    Alert.alert('Cerrar sesión', '¿Quieres salir de tu cuenta?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Salir', style: 'destructive', onPress: () => cerrarSesion() },
-    ]);
+  const salir = async () => {
+    const ok = await confirmar({ titulo: 'Cerrar sesión', mensaje: '¿Quieres salir de tu cuenta?', aceptar: 'Salir', cancelar: 'Cancelar', destructivo: true });
+    if (ok) await cerrarSesion();
+  };
 
   const sistema = Platform.OS === 'ios' ? `iOS ${Platform.Version}` : Platform.OS === 'android' ? `Android (API ${Platform.Version})` : 'Web';
   const usadas = reservas.filter((r) => r.estado === 'usada' || r.estado === 'activa').length;
@@ -91,7 +91,7 @@ export function ProfileScreen() {
           <Fila icono={bio?.icono ?? 'finger-print'} titulo={`Ingresar con ${bio?.nombre ?? 'biometría'}`} subtitulo={bio?.disponible ? 'Sin escribir tu contraseña' : 'No disponible en este equipo'}>
             <Switch value={bioActiva} onValueChange={alternarBio} trackColor={{ true: colors.secondary, false: colors.border }} thumbColor={Platform.OS === 'android' ? '#FFFFFF' : undefined} />
           </Fila>
-          <Fila icono="lock-closed" titulo="Sesión cifrada" subtitulo={Platform.OS === 'ios' ? 'Guardada en el Llavero de iOS' : 'Guardada en el Keystore de Android'} />
+          <Fila icono="lock-closed" titulo="Sesión cifrada" subtitulo={Platform.select({ ios: 'Guardada en el Llavero de iOS', android: 'Guardada en el Keystore de Android', default: 'Guardada en este navegador' })} />
         </Seccion>
 
         <Seccion titulo="Notificaciones" indice={1}>

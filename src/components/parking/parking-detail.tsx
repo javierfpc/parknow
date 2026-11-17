@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 
 import { Button } from '@/components/ui/button';
@@ -9,14 +9,17 @@ import { Chip } from '@/components/ui/chip';
 import { LevelBadge, OccupancyBar } from '@/components/ui/level-badge';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { Text } from '@/components/ui/text';
+import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/context/auth-context';
 import { useParqueaderos } from '@/context/parking-context';
 import { useReservas } from '@/context/reservations-context';
 import { abrirComoLlegar } from '@/lib/direcciones';
 import { calcularTotal, cuposLibres, formatoCOP, formatoDistancia, formatoHora, nivel, SERVICIOS } from '@/lib/parking';
 import { autenticar, detectarBiometria, type Biometria } from '@/services/biometrics';
+import { confirmar as pedirConfirmacion } from '@/services/confirm';
 import { vibrar } from '@/services/haptics';
 import { radius, spacing, useTheme } from '@/theme';
+import type { Reserva } from '@/types';
 
 const LLEGADAS = [
   { min: 15, texto: 'En 15 min' },
@@ -37,7 +40,9 @@ export function ParkingDetail({ parqueaderoId, distancia, onCerrar }: Props) {
   const [llegadaMin, setLlegadaMin] = useState(30);
   const [horas, setHoras] = useState(2);
   const [pagando, setPagando] = useState(false);
-  const [listo, setListo] = useState(false);
+  // La reserva creada: la pantalla de éxito muestra su hora fija, no una que se recalcula.
+  const [listo, setListo] = useState<Reserva | null>(null);
+  const toast = useToast();
   const [bio, setBio] = useState<Biometria | null>(null);
 
   useEffect(() => {
@@ -65,18 +70,25 @@ export function ParkingDetail({ parqueaderoId, distancia, onCerrar }: Props) {
           }
         }
         await new Promise((r) => setTimeout(r, 900)); // simula la pasarela de pago
-        await crear(p, llegada, horas);
+        const r = await crear(p, llegada, horas);
         vibrar.exito();
-        setListo(true);
+        setListo(r);
+      } catch {
+        vibrar.error();
+        toast('No se pudo completar la reserva. Intenta de nuevo.', 'error');
       } finally {
         setPagando(false);
       }
     };
     if (activa) {
-      Alert.alert('Ya tienes una reserva', `Si continúas, se cancela tu reserva en ${activa.parqueaderoNombre}.`, [
-        { text: 'Volver', style: 'cancel' },
-        { text: 'Reemplazar', style: 'destructive', onPress: confirmar },
-      ]);
+      const ok = await pedirConfirmacion({
+        titulo: 'Ya tienes una reserva',
+        mensaje: `Si continúas, se cancela tu reserva en ${activa.parqueaderoNombre}.`,
+        aceptar: 'Reemplazar',
+        cancelar: 'Volver',
+        destructivo: true,
+      });
+      if (ok) await confirmar();
     } else {
       await confirmar();
     }
@@ -92,7 +104,8 @@ export function ParkingDetail({ parqueaderoId, distancia, onCerrar }: Props) {
           ¡Cupo reservado!
         </Text>
         <Text color="textMuted" center>
-          {p.nombre} te espera a las {formatoHora(llegada.toISOString())}. Te avisaremos 10 minutos antes.
+          {p.nombre} te espera a las {formatoHora(listo.llegada)}
+          {'\n'}Te avisaremos 10 minutos antes.
         </Text>
         <Button
           titulo="Ver mi código QR"

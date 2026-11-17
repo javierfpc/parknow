@@ -34,9 +34,10 @@ export async function pedirPermiso(): Promise<boolean> {
   return nuevo.granted;
 }
 
-async function programar(titulo: string, cuerpo: string, segundos: number): Promise<void> {
+async function programar(titulo: string, cuerpo: string, segundos: number, identificador?: string): Promise<void> {
   if (!(await pedirPermiso())) return;
   await Notifications.scheduleNotificationAsync({
+    identifier: identificador,
     content: { title: titulo, body: cuerpo, sound: true },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
@@ -46,14 +47,36 @@ async function programar(titulo: string, cuerpo: string, segundos: number): Prom
   });
 }
 
-export async function notificarReservaConfirmada(parqueadero: string, llegada: Date): Promise<void> {
+const idRecordatorio = (reservaId: string) => `recordatorio-${reservaId}`;
+
+export async function notificarReservaConfirmada(parqueadero: string, llegada: Date, reservaId: string): Promise<void> {
   try {
     await programar('Reserva confirmada ✅', `Tu cupo en ${parqueadero} te espera. Muestra el QR al llegar.`, 2);
     const recordatorio = (llegada.getTime() - Date.now()) / 1000 - 10 * 60;
     if (recordatorio > 5) {
-      await programar('Tu reserva empieza en 10 minutos', `${parqueadero}: ten listo tu código QR.`, recordatorio);
+      await programar('Tu reserva empieza en 10 minutos', `${parqueadero}: ten listo tu código QR.`, recordatorio, idRecordatorio(reservaId));
     }
   } catch {
     // Expo Go o permisos denegados: la reserva sigue siendo válida.
+  }
+}
+
+/** Quita el recordatorio de una reserva cancelada o reemplazada. */
+export async function cancelarRecordatorio(reservaId: string): Promise<void> {
+  if (Platform.OS === 'web') return;
+  try {
+    await Notifications.cancelScheduledNotificationAsync(idRecordatorio(reservaId));
+  } catch {
+    // No había recordatorio programado.
+  }
+}
+
+/** Al cerrar sesión no deben llegar recordatorios de la cuenta anterior. */
+export async function cancelarTodosLosRecordatorios(): Promise<void> {
+  if (Platform.OS === 'web') return;
+  try {
+    await Notifications.cancelAllScheduledNotificationsAsync();
+  } catch {
+    // Sin permisos o sin notificaciones programadas.
   }
 }

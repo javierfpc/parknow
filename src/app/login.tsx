@@ -101,7 +101,8 @@ export default function LoginScreen() {
       </LinearGradient>
 
       {/* Validación de plataforma: iOS desplaza con padding; Android ya redimensiona la ventana. */}
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      {/* El margen negativo va aquí y no dentro del ScrollView, que recortaría la tarjeta. */}
+      <KeyboardAvoidingView style={styles.cuerpo} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={[styles.form, { paddingBottom: insets.bottom + 24 }]} keyboardShouldPersistTaps="handled">
           <Animated.View entering={FadeInUp.delay(250).springify().damping(16)} style={[styles.tarjeta, { backgroundColor: colors.surface }, shadow(3)]}>
             <Text variant="title">Ingresa a tu cuenta</Text>
@@ -168,6 +169,7 @@ export default function LoginScreen() {
                     setError('');
                   }}
                   style={[styles.demo, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                  accessibilityRole="button"
                   accessibilityLabel={`Usar cuenta de ${d.texto}`}
                 >
                   <Ionicons name={d.icono} size={20} color={colors.tint} />
@@ -200,7 +202,8 @@ function Campo({ icono, etiqueta, children }: { icono: keyof typeof Ionicons.gly
 const styles = StyleSheet.create({
   hero: { paddingBottom: 72, alignItems: 'center', overflow: 'hidden' },
   burbuja: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: '#00B4D8', opacity: 0.18 },
-  form: { paddingHorizontal: spacing.xl, gap: spacing.xl, marginTop: -48 },
+  cuerpo: { flex: 1, marginTop: -48 },
+  form: { paddingHorizontal: spacing.xl, gap: spacing.xl },
   tarjeta: { borderRadius: radius.xl, padding: spacing.xl, gap: spacing.lg },
   campo: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 52, borderRadius: radius.md, borderWidth: 1, paddingHorizontal: 14 },
   input: { flex: 1, fontFamily: fonts.medium, fontSize: 15, height: '100%' },

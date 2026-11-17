@@ -1,6 +1,6 @@
-// Página HTML del mapa (Leaflet + teselas de OpenStreetMap/CARTO). No requiere llave de API.
+// Página HTML del mapa (Leaflet + teselas de OpenStreetMap). No requiere llave de API.
+// CARTO dejó de servir teselas sin llave, así que se usan las de OSM y el tema oscuro se logra con un filtro CSS.
 export function construirHtmlMapa(oscuro: boolean, centro: { lat: number; lng: number }): string {
-  const estilo = oscuro ? 'dark_all' : 'rastertiles/voyager';
   return `<!DOCTYPE html>
 <html><head>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
@@ -9,6 +9,7 @@ export function construirHtmlMapa(oscuro: boolean, centro: { lat: number; lng: n
 <style>
   html,body,#map{margin:0;height:100%;width:100%;background:${oscuro ? '#0b1020' : '#eef2f7'};}
   .leaflet-control-attribution{font-size:9px;opacity:.7}
+  ${oscuro ? '.leaflet-tile-pane{filter:invert(1) hue-rotate(200deg) brightness(.85) contrast(.9) saturate(.6)}' : ''}
   .pin{transform:translate(-50%,-100%);display:inline-flex;align-items:center;gap:4px;white-space:nowrap;
     font:700 12px -apple-system,Roboto,sans-serif;color:#fff;padding:6px 10px;border-radius:999px;
     box-shadow:0 6px 14px rgba(3,4,94,.35);border:2px solid #fff;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
@@ -28,9 +29,9 @@ export function construirHtmlMapa(oscuro: boolean, centro: { lat: number; lng: n
 <script>
   var enviar = function(m){ window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify(m)); };
   var map = L.map('map', { zoomControl:false, attributionControl:true }).setView([${centro.lat}, ${centro.lng}], 14);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/${estilo}/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19, subdomains: 'abcd',
-    attribution: '&copy; OpenStreetMap &copy; CARTO'
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap'
   }).addTo(map);
   var marcas = {}; var yo = null; var seleccion = null; var primera = true;
   function icono(p, sel, i){

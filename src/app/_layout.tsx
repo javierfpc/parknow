@@ -62,7 +62,9 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    configurarNotificaciones();
+    configurarNotificaciones().catch(() => {
+      // Sin canal de notificaciones la app sigue funcionando.
+    });
   }, []);
 
   if (!fuentes) return null;

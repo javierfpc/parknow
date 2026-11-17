@@ -39,7 +39,7 @@ Talleres anteriores que se pueden mostrar aquí: animaciones con Reanimated (reb
 
 ## Mapa
 
-Leaflet dentro de un `react-native-webview` (`src/components/map/`), con teselas de CARTO/OpenStreetMap. **No usa Google Maps ni llaves de API**: así funciona en Expo Go y en el APK sin facturación. React Native y la página del mapa se comunican así: `postMessage` hacia React Native, e `injectJavaScript` (`window.ponerDatos`, `window.volar`) hacia el mapa.
+Leaflet dentro de un `react-native-webview` (`src/components/map/`), con teselas de OpenStreetMap (CARTO ya exige llave; el tema oscuro es un filtro CSS). En la web se usa `parking-map.web.tsx`, con un `<iframe>`. **No usa Google Maps ni llaves de API**: así funciona en Expo Go y en el APK sin facturación. React Native y la página del mapa se comunican así: `postMessage` hacia React Native, e `injectJavaScript` (`window.ponerDatos`, `window.volar`) hacia el mapa.
 
 ## Estructura
 

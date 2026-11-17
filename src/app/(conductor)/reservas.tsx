@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   FadeInDown,
@@ -22,6 +22,7 @@ import { useParqueaderos } from '@/context/parking-context';
 import { useReservas } from '@/context/reservations-context';
 import { abrirComoLlegar } from '@/lib/direcciones';
 import { formatoCOP, formatoFecha, formatoHora } from '@/lib/parking';
+import { confirmar } from '@/services/confirm';
 import { vibrar } from '@/services/haptics';
 import { radius, shadow, spacing, useTheme } from '@/theme';
 import type { EstadoReserva, Reserva } from '@/types';
@@ -109,24 +110,20 @@ function Ticket({ reserva }: { reserva: Reserva }) {
   }, [barrido]);
   const linea = useAnimatedStyle(() => ({ transform: [{ translateY: barrido.value * (QR_TAM + 8) }] }));
 
-  const pedirCancelacion = () => {
+  const pedirCancelacion = async () => {
     const gratis = inicio - Date.now() > 3600_000;
-    Alert.alert(
-      '¿Cancelar la reserva?',
-      gratis ? 'Faltan más de 1 hora: la cancelación es gratis.' : 'Falta menos de 1 hora: según las reglas, perderías lo pagado.',
-      [
-        { text: 'Mantener', style: 'cancel' },
-        {
-          text: 'Cancelar reserva',
-          style: 'destructive',
-          onPress: () => {
-            cancelar(reserva.id);
-            vibrar.exito();
-            toast('Reserva cancelada', 'info');
-          },
-        },
-      ],
-    );
+    const ok = await confirmar({
+      titulo: '¿Cancelar la reserva?',
+      mensaje: gratis ? 'Faltan más de 1 hora: la cancelación es gratis.' : 'Falta menos de 1 hora: según las reglas, perderías lo pagado.',
+      aceptar: 'Cancelar reserva',
+      cancelar: 'Mantener',
+      destructivo: true,
+    });
+    if (ok) {
+      cancelar(reserva.id);
+      vibrar.exito();
+      toast('Reserva cancelada', 'info');
+    }
   };
 
   return (

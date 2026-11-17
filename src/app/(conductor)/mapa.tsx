@@ -30,7 +30,9 @@ export default function MapaScreen() {
   const { coords, estado, localizar, abrirAjustes, buscando } = useUbicacion();
   const { texto, setTexto, filtro, setFiltro, resultados } = useBusqueda(coords);
   const [seleccion, setSeleccion] = useState<string | null>(null);
-  const [detalle, setDetalle] = useState(false);
+  // La hoja guarda su propio parqueadero: si deja de cumplir el filtro (se llena, se quita de favoritos),
+  // no se cierra en medio del pago ni se reabre sola después.
+  const [detalle, setDetalle] = useState<{ id: string; distancia?: number } | null>(null);
 
   const elegido = resultados.find((p) => p.id === seleccion);
 
@@ -94,7 +96,7 @@ export default function MapaScreen() {
           style={[styles.mini, { bottom: 96 + insets.bottom }]}
         >
           <PressableScale
-            onPress={() => setDetalle(true)}
+            onPress={() => setDetalle({ id: elegido.id, distancia: elegido.distancia })}
             escala={0.98}
             style={[styles.miniCard, { backgroundColor: colors.surface }, shadow(3)]}
             accessibilityLabel={`Ver detalle de ${elegido.nombre}`}
@@ -123,8 +125,8 @@ export default function MapaScreen() {
         </Animated.View>
       )}
 
-      <BottomSheet visible={detalle && !!elegido} onClose={() => setDetalle(false)}>
-        {elegido && <ParkingDetail parqueaderoId={elegido.id} distancia={elegido.distancia} onCerrar={() => setDetalle(false)} />}
+      <BottomSheet visible={!!detalle} onClose={() => setDetalle(null)}>
+        {detalle && <ParkingDetail parqueaderoId={detalle.id} distancia={detalle.distancia} onCerrar={() => setDetalle(null)} />}
       </BottomSheet>
     </View>
   );

@@ -39,15 +39,8 @@ export function ParkingCard({ parqueadero: p, indice, onPress }: Props) {
               {p.barrio} · {formatoDistancia(p.distancia)}
             </Text>
           </View>
-          <PressableScale
-            onPress={() => alternarFavorito(p.id)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel={favorito ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-            escala={0.8}
-          >
-            <Ionicons name={favorito ? 'heart' : 'heart-outline'} size={24} color={favorito ? '#E11D48' : colors.textMuted} />
-          </PressableScale>
+          {/* Espacio reservado para el corazón, que va fuera de la tarjeta para no anidar botones. */}
+          <View style={styles.hueco} />
         </View>
 
         <View style={styles.fila}>
@@ -63,6 +56,16 @@ export function ParkingCard({ parqueadero: p, indice, onPress }: Props) {
         </View>
         <OccupancyBar ocupados={p.ocupados} capacidad={p.capacidad} nivel={n} />
       </PressableScale>
+      <PressableScale
+        onPress={() => alternarFavorito(p.id)}
+        hitSlop={10}
+        accessibilityRole="button"
+        accessibilityLabel={favorito ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+        escala={0.8}
+        style={styles.favorito}
+      >
+        <Ionicons name={favorito ? 'heart' : 'heart-outline'} size={24} color={favorito ? '#E11D48' : colors.textMuted} />
+      </PressableScale>
     </Animated.View>
   );
 }
@@ -70,6 +73,9 @@ export function ParkingCard({ parqueadero: p, indice, onPress }: Props) {
 const styles = StyleSheet.create({
   card: { borderRadius: radius.lg, padding: spacing.lg, gap: spacing.md, borderWidth: StyleSheet.hairlineWidth },
   cabecera: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  hueco: { width: 24 },
+  // Misma posición que tenía dentro de la cabecera: el padding de la tarjeta + centrado con el ícono de 46.
+  favorito: { position: 'absolute', top: spacing.lg + 11, right: spacing.lg, zIndex: 1 },
   icono: { width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   fila: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
 });

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { autenticar } from '@/services/biometrics';
+import { cancelarTodosLosRecordatorios } from '@/services/notifications';
 import { almacenSeguro, CLAVES } from '@/services/storage';
 import type { Usuario } from '@/types';
 
@@ -93,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const cerrarSesion = useCallback(async () => {
     await almacenSeguro.borrar(CLAVES.sesion);
+    await cancelarTodosLosRecordatorios();
     setUsuario(null);
   }, []);
 

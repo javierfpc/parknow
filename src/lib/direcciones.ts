@@ -14,7 +14,9 @@ export async function abrirComoLlegar({ lat, lng }: Coordenadas, nombre: string)
     default: web,
   });
   try {
-    if (await Linking.canOpenURL(nativa)) return await Linking.openURL(nativa);
+    // Validación de plataforma: en Android 11+ canOpenURL devuelve false si el esquema no está
+    // declarado en <queries>, así que allí se intenta abrir directo y, si falla, se usa el navegador.
+    if (Platform.OS === 'android' || (await Linking.canOpenURL(nativa))) return await Linking.openURL(nativa);
   } catch {
     // Sin app de mapas: se usa el navegador.
   }
