@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ParkNow — Presentación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400..800&display=swap">
+<style>
+/* ---- Presentador ---- */
+html, body { margin: 0; height: 100%; background: #02040E; overflow: hidden; }
+#escena { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: 0 0; }
+#escena > section { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block;
+  visibility: hidden; opacity: 0; transition: opacity 600ms ease, transform 700ms cubic-bezier(0.22, 1, 0.36, 1); }
+#escena > section.actual { visibility: visible; opacity: 1; transform: none; z-index: 2; }
+#escena > section.sale-fade { visibility: visible; opacity: 0; z-index: 1; }
+#escena > section.sale-push { visibility: visible; opacity: 1; transform: translateX(-1920px); z-index: 1; }
+#escena > section.entra-push { transform: translateX(1920px); opacity: 1; transition: none; }
+section p, section h1, section h2, section h3 { margin: 0; }
+section h1, section h2, section h3 { font-weight: 600; }
+x-shape { display: block; }
+x-shape[kind="ellipse"] { border-radius: 50%; }
+/* En el navegador los resplandores pueden ser más suaves que en el visor de Slides (que limita el desenfoque a 20 px). */
+section x-shape[kind="ellipse"] { filter: blur(80px) !important; }
+x-icon { display: inline-flex; width: 32px; height: 32px; flex: none; }
+x-icon svg { width: 100%; height: 100%; }
+#barra { position: fixed; left: 0; bottom: 0; height: 4px; background: #00B4D8; transition: width 400ms ease; z-index: 10; }
+#ayuda { position: fixed; right: 16px; bottom: 14px; font: 600 13px 'Plus Jakarta Sans', Arial, sans-serif; color: #9AA8C4;
+  opacity: 0.55; z-index: 10; pointer-events: none; }
+/* ---- Estilos de la presentación ---- */
+/* ParkNow — paleta y tipografía tomadas de src/theme de la app (tema oscuro + acentos de marca). */
+body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; }
+
+section {
+  counter-increment: page;
+  padding: 128px;
+  box-sizing: border-box;
+  background: #060B1E;
+  color: #EEF3FF;
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+}
+section.con-pie { padding: 128px 128px 160px; }
+section.claro { background: #F4F7FC; color: #0B1630; }
+section.acento { background: linear-gradient(135deg, #03045E 0%, #02368A 55%, #0077B6 100%); color: #EEF3FF; }
+
+/* ---------- Tipografía: 120 / 72 / 44 / 32 / 24 ---------- */
+.ceja { font-size: 24px; font-weight: 700; letter-spacing: 4px; color: #00B4D8; }
+section.claro .ceja { color: #0077B6; }
+section.acento .ceja { color: #90E0EF; }
+.hero { font-size: 120px; font-weight: 800; line-height: 1.02; letter-spacing: -3px; }
+.titulo { font-size: 72px; font-weight: 800; line-height: 1.08; letter-spacing: -1.5px; }
+.sub { font-size: 44px; font-weight: 600; line-height: 1.2; }
+.cuerpo { font-size: 32px; line-height: 1.45; color: #9AA8C4; }
+section.claro .cuerpo { color: #55657E; }
+section.acento .cuerpo { color: #D3E9F7; }
+.chico { font-size: 24px; line-height: 1.4; color: #9AA8C4; }
+section.claro .chico { color: #55657E; }
+.cian { color: #90E0EF; }
+.azul { color: #0077B6; }
+
+/* ---------- Estructura ---------- */
+.col { display: flex; flex-direction: column; gap: 40px; }
+.encabezado { display: flex; flex-direction: column; gap: 20px; }
+.fila { display: flex; gap: 32px; }
+.fila > div { flex: 1; }
+.rejilla3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 28px; }
+
+/* ---------- Tarjetas ---------- */
+.tarjeta { background: #0E1631; border: 1px solid #22305A; border-radius: 28px; padding: 40px; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box; }
+section.claro .tarjeta { background: #FFFFFF; border: 1px solid #DCE5F0; box-shadow: 0 24px 56px rgba(3, 4, 94, 0.08); }
+section.acento .tarjeta { background: rgba(3, 4, 94, 0.35); border: 1px solid rgba(144, 224, 239, 0.35); }
+.tarjeta .t-titulo { font-size: 32px; font-weight: 700; line-height: 1.25; }
+.tarjeta .t-texto { font-size: 24px; line-height: 1.45; color: #9AA8C4; }
+section.claro .tarjeta .t-texto { color: #55657E; }
+section.acento .tarjeta .t-texto { color: #D3E9F7; }
+.icono { width: 72px; height: 72px; border-radius: 20px; background: #16213F; display: flex; align-items: center; justify-content: center; }
+.icono x-icon { width: 38px; height: 38px; color: #4CC9F0; }
+section.claro .icono { background: #EAF1FA; }
+section.claro .icono x-icon { color: #02368A; }
+.paso { font-size: 72px; font-weight: 800; line-height: 1; color: #00B4D8; }
+.dato { font-size: 120px; font-weight: 800; line-height: 1; letter-spacing: -3px; color: #02368A; }
+section.acento .dato, .dato-claro { color: #90E0EF; }
+
+/* Píldoras de disponibilidad: siempre ícono + texto, como en la app */
+.pildora { font-size: 24px; font-weight: 700; padding: 6px 16px; border-radius: 999px; }
+.p-alta { background: rgba(74, 222, 128, 0.14); color: #4ADE80; }
+.p-baja { background: rgba(251, 146, 60, 0.16); color: #FB923C; }
+.p-llena { background: rgba(248, 113, 113, 0.16); color: #F87171; }
+
+/* Lista de verificación */
+.check { display: flex; align-items: center; gap: 20px; }
+.check x-icon { width: 36px; height: 36px; color: #15803D; }
+.check .chk-texto { font-size: 28px; line-height: 1.3; color: #0B1630; }
+section .check-osc x-icon { color: #4ADE80; }
+section .check-osc .chk-texto { color: #EEF3FF; }
+
+/* ---------- Fondo: orbes de luz ---------- */
+.orbe { position: absolute; background: #00B4D8; opacity: 0.22; filter: blur(20px); }
+.orbe-2 { background: #0077B6; opacity: 0.3; }
+
+/* ---------- Teléfono de muestra ---------- */
+.telefono { position: absolute; width: 380px; height: 780px; box-sizing: border-box; border-radius: 56px; background: #0E1631; border: 10px solid #1C2A50; padding: 22px; display: flex; flex-direction: column; gap: 14px; overflow: hidden; box-shadow: 0 40px 120px rgba(0, 180, 216, 0.28); }
+.tel-cab { background: linear-gradient(135deg, #03045E 0%, #02368A 55%, #0077B6 100%); border-radius: 28px; padding: 22px 24px; display: flex; flex-direction: column; gap: 4px; }
+.tel-cab .tel-saludo { font-size: 24px; color: #D3E9F7; }
+.tel-cab .tel-nombre { font-size: 32px; font-weight: 800; color: #FFFFFF; }
+.tel-tarjeta { background: #16213F; border-radius: 22px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.tel-tarjeta .tel-lugar { font-size: 24px; font-weight: 700; color: #EEF3FF; white-space: nowrap; }
+.tel-fila { display: flex; justify-content: space-between; align-items: center; }
+.tel-fila .pildora { white-space: nowrap; }
+.tel-fila .tel-precio { font-size: 24px; font-weight: 800; color: #4CC9F0; }
+.tel-barra { margin-top: auto; background: #16213F; border-radius: 999px; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
+.tel-barra x-icon { width: 30px; height: 30px; color: #9AA8C4; }
+.tel-barra .activo { color: #4CC9F0; }
+
+/* ---------- Marca ---------- */
+.logo { width: 120px; height: 120px; border-radius: 34px; background: linear-gradient(135deg, #00B4D8 0%, #02368A 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 24px 64px rgba(0, 180, 216, 0.35); }
+.logo .logo-letra { font-size: 72px; font-weight: 800; color: #FFFFFF; line-height: 1; }
+
+/* ---------- Pie ---------- */
+.pie { position: absolute; left: 128px; bottom: 64px; width: 1664px; display: flex; justify-content: space-between; align-items: center; }
+.pie .pie-texto { font-size: 24px; color: #9AA8C4; }
+.pie .pie-num { font-size: 24px; font-weight: 700; color: #9AA8C4; }
+.pie .pie-num::after { content: counter(page, decimal-leading-zero); }
+section.claro .pie .pie-texto, section.claro .pie .pie-num { color: #55657E; }
+
+/* ---------- Movimiento: llega en menos de un segundo, escalonado con --i ---------- */
+@keyframes subir { from { opacity: 0; transform: translateY(48px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes zoom { from { opacity: 0; transform: scale(0.88); } to { opacity: 1; transform: scale(1); } }
+@keyframes aparecer { from { opacity: 0; } }
+@keyframes flotar-in { from { opacity: 0; transform: translateY(120px) rotate(6deg); } to { opacity: 1; transform: translateY(0) rotate(0deg); } }
+@keyframes agitar { 0% { transform: rotate(0deg); } 15% { transform: rotate(-9deg); } 30% { transform: rotate(8deg); } 45% { transform: rotate(-6deg); } 60% { transform: rotate(5deg); } 75% { transform: rotate(-2deg); } 100% { transform: rotate(0deg); } }
+@keyframes brillar { from { opacity: 0; box-shadow: 0 0 0 rgba(0, 180, 216, 0); } to { opacity: 1; box-shadow: 0 24px 64px rgba(0, 180, 216, 0.35); } }
+
+.a { animation: subir 900ms cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: calc(var(--i, 0) * 110ms); }
+.z { animation: zoom 900ms cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: calc(var(--i, 0) * 110ms); }
+.f { animation: aparecer 1400ms ease both; }
+.tel-entra { animation: flotar-in 1100ms cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 250ms; }
+.sacudir { animation: agitar 1400ms ease-in-out 700ms both; }
+.logo-in { animation: brillar 900ms ease both; }
+
+/* ================= Diapositivas de funciones: texto a la izquierda, escenario animado a la derecha ================= */
+.texto-f { width: 800px; display: flex; flex-direction: column; gap: 28px; }
+.apoyo { display: flex; flex-direction: column; gap: 22px; margin-top: 12px; }
+.apoyo-item { border-left: 4px solid #00B4D8; padding-left: 24px; display: flex; flex-direction: column; gap: 4px; }
+.apoyo-item .apoyo-et { font-size: 24px; font-weight: 800; letter-spacing: 3px; color: #00B4D8; }
+.apoyo-item .apoyo-tx { font-size: 24px; line-height: 1.45; color: #D3E9F7; }
+.escenario { position: absolute; left: 1000px; top: 128px; width: 792px; height: 770px; box-sizing: border-box; border-radius: 40px; background: #0E1631; border: 1px solid #22305A; overflow: hidden; }
+.tarjeta .mini { margin-top: auto; border-radius: 18px; background: #0A1430; display: flex; justify-content: center; padding: 12px; }
+
+/* ---------- Movimientos de las ilustraciones ---------- */
+@keyframes dron { from { opacity: 1; transform: scale(3.4); } to { opacity: 0.22; transform: scale(1); } }
+@keyframes caer { 0% { opacity: 0; transform: translateY(-90px); } 60% { opacity: 1; transform: translateY(10px); } 80% { opacity: 1; transform: translateY(-4px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes pulso { 0% { opacity: 0.7; transform: scale(0.6); } 100% { opacity: 0; transform: scale(2.2); } }
+@keyframes barrido { from { transform: translateY(0); } to { transform: translateY(276px); } }
+@keyframes encender { from { opacity: 0; } to { opacity: 0.5; } }
+@keyframes iluminar { from { filter: brightness(0.3); } to { filter: brightness(1); } }
+@keyframes boton-on { from { background-color: rgba(255, 255, 255, 0.16); } to { background-color: #FFF4C2; } }
+@keyframes bajar { from { opacity: 0; transform: translateY(-180px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes vibrar { 0% { transform: translateX(0); } 15% { transform: translateX(-7px); } 30% { transform: translateX(7px); } 45% { transform: translateX(-6px); } 60% { transform: translateX(6px); } 80% { transform: translateX(-3px); } 100% { transform: translateX(0); } }
+@keyframes ondas { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes presionar { 0% { transform: scale(1); } 18% { transform: scale(0.92); } 40% { transform: scale(1.04); } 55% { transform: scale(1); } 100% { transform: scale(1); } }
+@keyframes onda-boton { 0% { opacity: 0; transform: scale(1); } 18% { opacity: 0.7; transform: scale(1); } 70% { opacity: 0; transform: scale(1.45); } 100% { opacity: 0; transform: scale(1.45); } }
+@keyframes hoja { 0% { transform: translateY(440px); } 22% { transform: translateY(0); } 42% { transform: translateY(0); } 60% { transform: translateY(170px); } 78% { transform: translateY(0); } 100% { transform: translateY(0); } }
+@keyframes dedo { 0% { opacity: 0; transform: translateY(0); } 40% { opacity: 0; transform: translateY(0); } 45% { opacity: 0.9; transform: translateY(0); } 60% { opacity: 0.9; transform: translateY(170px); } 72% { opacity: 0.9; transform: translateY(170px); } 80% { opacity: 0; transform: translateY(170px); } 100% { opacity: 0; transform: translateY(170px); } }
+@keyframes pestanas { 0% { transform: translateX(0); } 20% { transform: translateX(0); } 30% { transform: translateX(170px); } 48% { transform: translateX(170px); } 58% { transform: translateX(340px); } 76% { transform: translateX(340px); } 86% { transform: translateX(510px); } 100% { transform: translateX(510px); } }
+@keyframes cerrar-candado { from { transform: translateY(-34px); } to { transform: translateY(0); } }
+@keyframes resaltar { from { box-shadow: 0 0 0 rgba(74, 222, 128, 0); border-color: #22305A; } to { box-shadow: 0 0 64px rgba(74, 222, 128, 0.35); border-color: #4ADE80; } }
+
+.dron { animation: dron 2200ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.tras-dron { animation: subir 900ms cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: calc(1500ms + var(--i, 0) * 110ms); }
+.tras-dron-z { animation: zoom 900ms cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: calc(1500ms + var(--i, 0) * 110ms); }
+.caer { animation: caer 900ms ease-out both; animation-delay: calc(400ms + var(--i, 0) * 180ms); }
+.pulso { animation: pulso 1600ms ease-out 4 both; animation-delay: 300ms; }
+.laser { animation: barrido 1100ms ease-in-out 4 alternate both; animation-delay: 1400ms; }
+.luz { animation: encender 700ms ease-out both; animation-delay: 1000ms; }
+.qr-luz { animation: iluminar 700ms ease-out both; animation-delay: 1000ms; }
+.boton-luz { animation: boton-on 300ms ease-out both; animation-delay: 1000ms; }
+.llega { animation: bajar 800ms cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: calc(600ms + var(--i, 0) * 1000ms); }
+.vibra { animation: vibrar 500ms linear 3 both; animation-delay: 650ms; }
+.ondas { opacity: 0; animation: ondas 700ms ease-in-out 4 both; animation-delay: 600ms; }
+.presiona { animation: presionar 1500ms ease-in-out 3 both; animation-delay: 600ms; }
+.onda-btn { opacity: 0; animation: onda-boton 1500ms ease-out 3 both; animation-delay: 600ms; }
+.hoja-mueve { animation: hoja 3600ms cubic-bezier(0.45, 0, 0.2, 1) both; animation-delay: 400ms; }
+.dedo { opacity: 0; animation: dedo 3600ms ease-in-out both; animation-delay: 400ms; }
+.indicador { transform: translateX(510px); animation: pestanas 4200ms cubic-bezier(0.45, 0, 0.2, 1) both; animation-delay: 500ms; }
+.argolla { animation: cerrar-candado 600ms cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 900ms; }
+.exito-pop { animation: zoom 700ms cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: var(--d, 2600ms); }
+.resalta { animation: resaltar 800ms ease-out both; animation-delay: var(--d, 2600ms); }
+@keyframes estacionar { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+.estaciona { offset-rotate: auto; animation: estacionar 2800ms cubic-bezier(0.45, 0, 0.2, 1) both; animation-delay: 1500ms; }
+
+/* ---------- Piezas de las ilustraciones ---------- */
+.esquina-qr { position: absolute; width: 56px; height: 56px; border-color: #00B4D8; border-style: solid; border-width: 0; }
+.pin-mapa { position: absolute; font-size: 24px; font-weight: 800; color: #FFFFFF; background: #0077B6; padding: 8px 18px; border-radius: 999px; border: 3px solid #EEF3FF; box-shadow: 0 10px 28px rgba(3, 4, 94, 0.5); }
+.notif { position: absolute; box-sizing: border-box; background: rgba(238, 243, 255, 0.95); border-radius: 26px; padding: 18px 22px; display: flex; gap: 16px; align-items: center; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35); }
+.notif .notif-t { font-size: 24px; font-weight: 800; color: #0B1630; }
+.notif .notif-x { font-size: 24px; color: #55657E; }
+.exito-chip { position: absolute; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 16px 26px; border-radius: 999px; background: #0E3A2A; border: 2px solid #4ADE80; }
+.exito-chip .exito-tx { font-size: 28px; font-weight: 800; color: #4ADE80; white-space: nowrap; }
+
+</style>
+</head>
+<body>
+<div id="escena">
+<section id="portada" data-transition="fade">
+<x-shape kind="ellipse" class="orbe f" style="left:1040px; top:0px; width:860px; height:860px;"></x-shape>
+<x-shape kind="ellipse" class="orbe orbe-2 f" style="left:0px; top:600px; width:460px; height:460px;"></x-shape>
+<div class="col" style="width:1060px; gap:36px;">
+<div class="logo logo-in"><p class="logo-letra">P<span class="cian">.</span></p></div>
+<h1 class="hero a" style="--i:1;">Park<span class="cian">Now</span></h1>
+<p class="sub a" style="--i:2; color:#D3E9F7;">Encuentra, reserva y entra con QR a los parqueaderos de Bogotá.</p>
+<p class="chico a" style="--i:4; margin-top:40px;">Sara Catalina Acosta Moreno · Javier Felipe Patiño Chaves · Jhon Jairo Martínez Forero</p>
+<p class="chico a" style="--i:5;">Desarrollo de Aplicaciones Móviles Híbridas · Universidad Compensar · Noviembre 2026</p>
+</div>
+<div class="telefono tel-entra" style="left:1340px; top:150px;">
+<div class="tel-cab"><p class="tel-saludo">Buenos días,</p><p class="tel-nombre">Sara</p></div>
+<div class="tel-tarjeta"><p class="tel-lugar">Parqueadero Calle 72</p><div class="tel-fila"><p class="pildora p-alta">● Hay cupos</p><p class="tel-precio">$6.500</p></div></div>
+<div class="tel-tarjeta"><p class="tel-lugar">Av. Chile</p><div class="tel-fila"><p class="pildora p-baja">● Pocos cupos</p><p class="tel-precio">$7.000</p></div></div>
+<div class="tel-tarjeta"><p class="tel-lugar">ParkPlus Zona T</p><div class="tel-fila"><p class="pildora p-llena">● Lleno</p><p class="tel-precio">$7.200</p></div></div>
+<div class="tel-barra"><x-icon name="Home" class="activo"></x-icon><x-icon name="Globe"></x-icon><x-icon name="Clock"></x-icon><x-icon name="Users"></x-icon></div>
+</div>
+
+</section>
+<section id="problema" class="claro con-pie" data-transition="fade">
+<x-shape kind="ellipse" class="f" style="position:absolute; left:1360px; top:40px; width:420px; height:420px; background:#00B4D8; opacity:0.1; filter:blur(20px);"></x-shape>
+<div class="col" style="gap:40px;">
+<div class="encabezado">
+<p class="ceja a">EL PROBLEMA</p>
+<h2 class="titulo a" style="--i:1; width:1400px;">Parquear en Bogotá todavía es una apuesta.</h2>
+</div>
+<div class="fila">
+<div class="tarjeta z" style="--i:3;">
+<div class="icono"><x-icon name="Search"></x-icon></div>
+<p class="t-titulo">Vueltas a ciegas</p>
+<p class="t-texto">No sabes si hay cupo hasta que llegas a la entrada. Si está lleno, toca buscar otro.</p>
+<div class="mini"><svg aria-label="Un carro da vueltas a la manzana" width="400" height="130" viewBox="0 0 400 130"><rect x="110" y="10" width="180" height="110" rx="28" fill="none" stroke="#22305A" stroke-width="16"/><rect x="134" y="30" width="132" height="70" rx="12" fill="#16213F"/><g transform="translate(200 58)" fill="none" stroke="#FB923C" stroke-width="5" stroke-linecap="round"><path d="M-8 -9a8 8 0 1 1 8 8v6"><animate attributeName="opacity" values="0.25;1;0.25" dur="1.2s" begin="0s" repeatCount="4"/></path><circle cx="0" cy="13" r="2.5" fill="#FB923C" stroke="none"/></g><g transform="translate(138 10)"><g><animateMotion path="M0 0h124a28 28 0 0 1 28 28v54a28 28 0 0 1 -28 28h-124a28 28 0 0 1 -28 -28v-54a28 28 0 0 1 28 -28z" dur="3s" begin="0s" repeatCount="3" rotate="auto"/><rect x="-16" y="-10" width="32" height="20" rx="6" fill="#00B4D8"/><rect x="4" y="-7" width="8" height="14" rx="2" fill="#90E0EF"/></g></g></svg></div>
+</div>
+<div class="tarjeta z" style="--i:4;">
+<div class="icono"><x-icon name="Warning"></x-icon></div>
+<p class="t-titulo">Precios sorpresa</p>
+<p class="t-texto">La tarifa la ves en el aviso de la puerta, cuando ya estás ahí.</p>
+<div class="mini"><svg aria-label="Etiqueta de precio desconocido que se balancea" width="400" height="130" viewBox="0 0 400 130"><path d="M120 14h160" stroke="#22305A" stroke-width="6" stroke-linecap="round"/><g><animateTransform attributeName="transform" type="rotate" values="-14 200 14;14 200 14;-14 200 14" dur="1.6s" begin="0s" repeatCount="3"/><path d="M200 14v20" stroke="#9AA8C4" stroke-width="3"/><rect x="152" y="34" width="96" height="84" rx="14" fill="#FB923C"/><circle cx="200" cy="48" r="5" fill="#0A1430"/><g transform="translate(200 86)" fill="none" stroke="#0B1630" stroke-width="6" stroke-linecap="round"><path d="M-10 -12a10 10 0 1 1 10 10v7"/><circle cx="0" cy="16" r="3" fill="#0B1630" stroke="none"/></g></g></svg></div>
+</div>
+<div class="tarjeta z" style="--i:5;">
+<div class="icono"><x-icon name="Clock"></x-icon></div>
+<p class="t-titulo">Filas en la entrada</p>
+<p class="t-texto">Tiquetes de papel y registro a mano: lento para el conductor y para el parqueadero.</p>
+<div class="mini"><svg aria-label="Fila de carros frente a una barrera cerrada" width="400" height="130" viewBox="0 0 400 130"><path d="M0 104H400" stroke="#22305A" stroke-width="4" stroke-dasharray="18 14"/><rect x="332" y="36" width="14" height="68" rx="5" fill="#9AA8C4"/><rect x="240" y="40" width="98" height="12" rx="6" fill="#F87171"/><path d="M262 40h14v12h-14zM298 40h14v12h-14z" fill="#EEF3FF"/><g><animateTransform attributeName="transform" type="translate" values="0 0;16 0;16 0;0 0" dur="2s" begin="0s" repeatCount="3"/><rect x="24" y="66" width="62" height="32" rx="10" fill="#1C2A50"/><rect x="100" y="66" width="62" height="32" rx="10" fill="#2A3F73"/><rect x="176" y="66" width="62" height="32" rx="10" fill="#00B4D8"/><rect x="220" y="71" width="10" height="22" rx="3" fill="#90E0EF"/></g></svg></div>
+</div>
+</div>
+</div>
+<div class="pie"><p class="pie-texto">ParkNow · El producto</p><p class="pie-num"></p></div>
+
+</section>
+<section id="solucion" class="acento" data-transition="fade">
+<x-shape kind="ellipse" class="orbe f" style="left:1120px; top:120px; width:760px; height:760px; opacity:0.2;"></x-shape>
+<div class="col" style="gap:44px; padding-top:40px; width:1000px;">
+<p class="ceja a">LA SOLUCIÓN</p>
+<h2 class="hero a" style="--i:1; font-size:104px;">Encuentra, reserva y entra con&#160;QR.</h2>
+<p class="cuerpo a" style="--i:2;">ParkNow conecta a los conductores con los cupos libres de los parqueaderos, en vivo y desde el celular.</p>
+<div class="fila a" style="--i:4; gap:20px;">
+<div class="tarjeta" style="padding:26px 28px;"><p class="t-titulo"><span class="cian">01</span> Encuentra</p></div>
+<div class="tarjeta" style="padding:26px 28px;"><p class="t-titulo"><span class="cian">02</span> Reserva</p></div>
+<div class="tarjeta" style="padding:26px 28px;"><p class="t-titulo"><span class="cian">03</span> Entra</p></div>
+</div>
+</div>
+<div class="tel-entra" style="position:absolute; left:1230px; top:128px; width:540px; border-radius:40px; background:#FBFCFF; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 40px 120px rgba(0, 0, 0, 0.4);">
+<div style="background:linear-gradient(135deg, #03045E 0%, #02368A 55%, #0077B6 100%); padding:32px 36px; display:flex; flex-direction:column; gap:10px;">
+<div style="display:flex; justify-content:space-between; align-items:center;"><p class="pildora p-alta">● Confirmada</p><p style="font-size:24px; font-weight:700; color:#90E0EF;">#0PFBFW</p></div>
+<p style="font-size:36px; font-weight:800; color:#FFFFFF;">Parqueadero Calle 72</p>
+<p style="font-size:24px; color:#D3E9F7;">Llegada 11:40 a. m. · 2 h · $13.000</p>
+</div>
+<div style="padding:32px 36px 36px; display:flex; flex-direction:column; align-items:center; gap:18px; border-top:3px dashed #DCE5F0;">
+<div style="position:relative; width:300px; height:300px;">
+<svg class="qr-luz" aria-label="Código QR de la reserva" width="300" height="300" viewBox="0 0 21 21" shape-rendering="crispEdges"><path fill="#0B1630" d="M0 0h7v1h-7zM8 0h2v1h-2zM11 0h1v1h-1zM14 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h2v1h-2zM11 1h2v1h-2zM14 1h1v1h-1zM20 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h3v1h-3zM12 2h1v1h-1zM14 2h1v1h-1zM16 2h3v1h-3zM20 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM12 3h1v1h-1zM14 3h1v1h-1zM16 3h3v1h-3zM20 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM9 4h1v1h-1zM11 4h2v1h-2zM14 4h1v1h-1zM16 4h3v1h-3zM20 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h2v1h-2zM11 5h1v1h-1zM14 5h1v1h-1zM20 5h1v1h-1zM0 6h7v1h-7zM9 6h1v1h-1zM11 6h2v1h-2zM14 6h7v1h-7zM8 7h1v1h-1zM10 7h2v1h-2zM0 8h2v1h-2zM4 8h1v1h-1zM9 8h1v1h-1zM11 8h2v1h-2zM14 8h1v1h-1zM16 8h1v1h-1zM0 9h1v1h-1zM4 9h1v1h-1zM7 9h1v1h-1zM9 9h1v1h-1zM14 9h2v1h-2zM17 9h4v1h-4zM0 10h1v1h-1zM2 10h3v1h-3zM6 10h2v1h-2zM12 10h3v1h-3zM17 10h4v1h-4zM2 11h4v1h-4zM12 11h1v1h-1zM17 11h3v1h-3zM0 12h11v1h-11zM13 12h5v1h-5zM20 12h1v1h-1zM9 13h4v1h-4zM14 13h2v1h-2zM18 13h1v1h-1zM20 13h1v1h-1zM0 14h7v1h-7zM12 14h3v1h-3zM18 14h2v1h-2zM0 15h1v1h-1zM6 15h1v1h-1zM13 15h1v1h-1zM15 15h5v1h-5zM0 16h1v1h-1zM2 16h3v1h-3zM6 16h1v1h-1zM9 16h1v1h-1zM13 16h5v1h-5zM0 17h1v1h-1zM2 17h3v1h-3zM6 17h1v1h-1zM8 17h1v1h-1zM11 17h1v1h-1zM16 17h2v1h-2zM19 17h1v1h-1zM0 18h1v1h-1zM2 18h3v1h-3zM6 18h1v1h-1zM9 18h2v1h-2zM13 18h3v1h-3zM18 18h1v1h-1zM0 19h1v1h-1zM6 19h1v1h-1zM9 19h1v1h-1zM11 19h2v1h-2zM17 19h1v1h-1zM20 19h1v1h-1zM0 20h7v1h-7zM8 20h3v1h-3zM12 20h3v1h-3zM16 20h2v1h-2zM20 20h1v1h-1z"/></svg>
+<div class="laser" style="position:absolute; left:-12px; top:10px; width:324px; height:6px; border-radius:3px; background:#00B4D8; box-shadow:0 0 24px rgba(0, 180, 216, 0.9);"></div>
+</div>
+<p style="font-size:24px; color:#55657E;">Muestra este código en la entrada</p>
+</div>
+</div>
+<div class="exito-chip exito-pop" style="--d:5800ms; left:1310px; top:800px;"><x-icon name="CheckCircle" style="width:34px; height:34px; color:#4ADE80;"></x-icon><p class="exito-tx">Entrada autorizada</p></div>
+
+</section>
+<section id="conductor" class="con-pie" data-transition="push">
+<svg class="dron" aria-label="" style="position:absolute; left:0px; top:0px;" width="1920" height="1080" viewBox="0 0 1920 1080"><rect width="1920" height="1080" fill="#0A1430"/><path fill="#101C3D" d="M40 40h260v200H40zM340 40h300v200H340zM680 40h260v200H680zM980 40h300v200H980zM1320 40h260v200h-260zM1620 40h260v200h-260zM40 280h260v240H40zM680 280h260v240H680zM980 280h300v240H980zM1620 280h260v240h-260zM40 560h260v220H40zM340 560h300v220H340zM980 560h300v220H980zM1320 560h260v220h-260zM1620 560h260v220h-260zM40 820h260v220H40zM340 820h300v220H340zM680 820h260v220H680zM1320 820h260v220h-260zM1620 820h260v220h-260z"/><path fill="#12382F" d="M340 280h300v240H340zM1320 280h260v240h-260zM680 560h260v220H680z"/><path fill="#0F2C55" d="M980 820h300v220H980z"/><path stroke="#2A3F73" stroke-width="22" fill="none" d="M0 1040L1920 120M960 0v1080"/><path stroke="#1C2A50" stroke-width="10" fill="none" d="M0 260h1920M0 540h1920M0 800h1920M320 0v1080M660 0v1080M1300 0v1080M1600 0v1080"/><circle cx="960" cy="540" r="22" fill="#00B4D8"/><circle cx="960" cy="540" r="46" fill="none" stroke="#00B4D8" stroke-width="4" opacity="0.5"/><circle cx="820" cy="410" r="12" fill="#0077B6"/><circle cx="1150" cy="660" r="12" fill="#FB923C"/><circle cx="1460" cy="400" r="12" fill="#0077B6"/><circle cx="480" cy="700" r="12" fill="#0077B6"/></svg>
+<div class="col" style="gap:52px;">
+<div class="encabezado">
+<p class="ceja tras-dron">CÓMO FUNCIONA · CONDUCTOR</p>
+<h2 class="titulo tras-dron" style="--i:1;">Del mapa a la entrada en cuatro pasos</h2>
+</div>
+<div class="fila" style="gap:28px;">
+<div class="tarjeta tras-dron-z" style="--i:2;">
+<p class="paso">01</p>
+<p class="t-titulo">Busca</p>
+<p class="t-texto">Mapa con cupos en vivo y filtros: con cupo, económicos, cubierto, eléctrico.</p>
+<div class="mini"><svg aria-label="Pin en el mapa" width="200" height="110" viewBox="0 0 200 110"><path stroke="#1C2A50" stroke-width="6" d="M0 40h200M0 84h200M60 0v110M140 0v110"/><ellipse cx="100" cy="92" rx="22" ry="7" fill="#00B4D8" opacity="0.35"><animate attributeName="rx" values="10;30;10" dur="1.4s" begin="0s" repeatCount="4"/></ellipse><g><animateTransform attributeName="transform" type="translate" values="0 -18;0 0;0 -18" dur="1.4s" begin="0s" repeatCount="4"/><path fill="#00B4D8" d="M100 88c-14-20-24-32-24-46a24 24 0 0 1 48 0c0 14-10 26-24 46z"/><circle cx="100" cy="42" r="9" fill="#0A1430"/></g></svg></div>
+</div>
+<div class="tarjeta tras-dron-z" style="--i:3;">
+<p class="paso">02</p>
+<p class="t-titulo">Elige</p>
+<p class="t-texto">Hora de llegada y tiempo. Ves el total antes de pagar.</p>
+<div class="mini"><svg aria-label="Selección de hora" width="200" height="110" viewBox="0 0 200 110"><rect x="8" y="35" width="56" height="40" rx="20" fill="#16213F"/><rect x="72" y="35" width="56" height="40" rx="20" fill="#16213F"/><rect x="136" y="35" width="56" height="40" rx="20" fill="#16213F"/><rect x="8" y="35" width="56" height="40" rx="20" fill="#0077B6"><animateTransform attributeName="transform" type="translate" values="0 0;64 0;128 0;64 0" dur="2.4s" begin="0s" repeatCount="2"/></rect><path fill="#4CC9F0" d="M24 88h20v6H24zM88 88h20v6H88zM152 88h20v6h-20z" opacity="0.6"/></svg></div>
+</div>
+<div class="tarjeta tras-dron-z" style="--i:4;">
+<p class="paso">03</p>
+<p class="t-titulo">Confirma</p>
+<p class="t-texto">Pagas con tu huella y te llega la confirmación, más un recordatorio.</p>
+<div class="mini"><svg aria-label="Huella" width="200" height="110" viewBox="0 0 200 110"><g transform="translate(50 0) scale(0.5)"><g fill="none" stroke="#22305A" stroke-width="9" stroke-linecap="round"><path d="M86.8 105.2A14 14 0 1 1 86.8 114.8"/><path d="M74.4 105.5A26 26 0 1 1 80.1 126.7"/><path d="M64.3 97.0A38 38 0 1 1 75.6 139.1"/><path d="M50.2 105.6A50 50 0 1 1 82.9 157.0"/><path d="M40.1 94.0A62 62 0 1 1 94.6 171.8"/><path d="M32.9 78.7A74 74 0 1 1 112.8 182.9"/></g><g fill="none" stroke="#00B4D8" stroke-width="9" stroke-linecap="round" stroke-dasharray="100"><path pathLength="100" stroke-dashoffset="0" d="M86.8 105.2A14 14 0 1 1 86.8 114.8"><animate attributeName="stroke-dashoffset" from="100" to="0" dur="1.6s" begin="0s"/></path><path pathLength="100" stroke-dashoffset="0" d="M74.4 105.5A26 26 0 1 1 80.1 126.7"><animate attributeName="stroke-dashoffset" from="100" to="0" dur="1.9s" begin="0s"/></path><path pathLength="100" stroke-dashoffset="0" d="M64.3 97.0A38 38 0 1 1 75.6 139.1"><animate attributeName="stroke-dashoffset" from="100" to="0" dur="2.2s" begin="0s"/></path><path pathLength="100" stroke-dashoffset="0" d="M50.2 105.6A50 50 0 1 1 82.9 157.0"><animate attributeName="stroke-dashoffset" from="100" to="0" dur="2.5s" begin="0s"/></path><path pathLength="100" stroke-dashoffset="0" d="M40.1 94.0A62 62 0 1 1 94.6 171.8"><animate attributeName="stroke-dashoffset" from="100" to="0" dur="2.8s" begin="0s"/></path><path pathLength="100" stroke-dashoffset="0" d="M32.9 78.7A74 74 0 1 1 112.8 182.9"><animate attributeName="stroke-dashoffset" from="100" to="0" dur="3.1s" begin="0s"/></path></g></g></svg></div>
+</div>
+<div class="tarjeta tras-dron-z" style="--i:5; border:1px solid #00B4D8;">
+<p class="paso">04</p>
+<p class="t-titulo">Entra</p>
+<p class="t-texto">Muestras tu QR y el parqueadero lo valida al instante.</p>
+<div class="mini"><svg aria-label="Barrera que se abre" width="200" height="110" viewBox="0 0 200 110"><rect x="24" y="30" width="22" height="70" rx="6" fill="#16213F"/><g><animateTransform attributeName="transform" type="rotate" values="0 35 40;-60 35 40;-60 35 40" dur="2.4s" begin="0s" repeatCount="2"/><rect x="35" y="34" width="150" height="12" rx="6" fill="#F87171"/><path fill="#EEF3FF" d="M70 34h18v12H70zM120 34h18v12h-18z"/></g><circle cx="35" cy="40" r="9" fill="#4ADE80"/></svg></div>
+</div>
+</div>
+</div>
+<div class="pie"><p class="pie-texto">ParkNow · El producto</p><p class="pie-num"></p></div>
+
+</section>
+<section id="parqueadero" class="claro con-pie" data-transition="push">
+<div class="col" style="gap:44px; width:820px;">
+<div class="encabezado">
+<p class="ceja a">CÓMO FUNCIONA · PARQUEADERO</p>
+<h2 class="titulo a" style="--i:1;">Tus cupos, en vivo y bajo control</h2>
+</div>
+<div class="col" style="gap:20px;">
+<div class="tarjeta a" style="--i:2; flex-direction:row; align-items:center; gap:28px; padding:26px 32px;">
+<div class="icono"><x-icon name="Chart"></x-icon></div>
+<div class="col" style="gap:4px;"><p class="t-titulo">Panel en vivo</p><p class="t-texto">Ocupación y últimos movimientos.</p></div>
+</div>
+<div class="tarjeta a" style="--i:3; flex-direction:row; align-items:center; gap:28px; padding:26px 32px;">
+<div class="icono"><x-icon name="Lightbulb"></x-icon></div>
+<div class="col" style="gap:4px;"><p class="t-titulo">Escáner QR con linterna</p><p class="t-texto">Valida la reserva, de día o de noche.</p></div>
+</div>
+<div class="tarjeta a" style="--i:4; flex-direction:row; align-items:center; gap:28px; padding:26px 32px;">
+<div class="icono"><x-icon name="Users"></x-icon></div>
+<div class="col" style="gap:4px;"><p class="t-titulo">Entradas sin reserva</p><p class="t-texto">Botones «Entró» y «Salió».</p></div>
+</div>
+</div>
+</div>
+<div class="escenario z" style="--i:2;">
+<p style="position:absolute; width:380px; font-size:32px; font-weight:800; color:#EEF3FF; top:20px; left:39px;">Calle 72 · en vivo</p>
+<div class="exito-chip exito-pop" style="--d:1100ms; left:420px; top:14px; padding:10px 22px;"><x-icon name="CheckCircle" style="width:30px; height:30px; color:#4ADE80;"></x-icon><p class="exito-tx" style="font-size:24px;">Entrada autorizada</p></div>
+<svg aria-label="Parqueadero visto desde arriba: una barrera se abre y un carro entra a un cupo libre" style="position:absolute; left:46px; top:90px;" width="700" height="330" viewBox="0 0 700 330"><rect width="700" height="330" rx="28" fill="#0A1430"/><path d="M0 165H700" stroke="#22305A" stroke-width="4" stroke-dasharray="18 14"/><path d="M100 16v100M200 16v100M300 16v100M400 16v100M500 16v100M600 16v100M100 214v100M200 214v100M300 214v100M400 214v100M500 214v100M600 214v100" stroke="#EEF3FF" stroke-width="3" opacity="0.35"/><rect x="402" y="20" width="96" height="92" rx="10" fill="#4ADE80" opacity="0.2"><animate attributeName="opacity" values="0.12;0.42;0.12" dur="1.2s" begin="0s" repeatCount="4"/></rect><rect x="202" y="218" width="96" height="92" rx="10" fill="#4ADE80" opacity="0.2"><animate attributeName="opacity" values="0.12;0.42;0.12" dur="1.2s" begin="0s" repeatCount="4"/></rect><g fill="#1C2A50"><rect x="122" y="24" width="56" height="84" rx="14"/><rect x="222" y="24" width="56" height="84" rx="14"/><rect x="322" y="24" width="56" height="84" rx="14"/><rect x="522" y="24" width="56" height="84" rx="14"/><rect x="622" y="24" width="56" height="84" rx="14"/><rect x="122" y="222" width="56" height="84" rx="14"/><rect x="322" y="222" width="56" height="84" rx="14"/><rect x="422" y="222" width="56" height="84" rx="14"/><rect x="522" y="222" width="56" height="84" rx="14"/><rect x="622" y="222" width="56" height="84" rx="14"/></g><g fill="#2A3F73"><rect x="130" y="80" width="40" height="18" rx="5"/><rect x="230" y="80" width="40" height="18" rx="5"/><rect x="330" y="80" width="40" height="18" rx="5"/><rect x="530" y="80" width="40" height="18" rx="5"/><rect x="630" y="80" width="40" height="18" rx="5"/><rect x="130" y="232" width="40" height="18" rx="5"/><rect x="330" y="232" width="40" height="18" rx="5"/><rect x="430" y="232" width="40" height="18" rx="5"/><rect x="530" y="232" width="40" height="18" rx="5"/><rect x="630" y="232" width="40" height="18" rx="5"/></g><rect x="60" y="206" width="20" height="20" rx="6" fill="#9AA8C4"/><g><animateTransform attributeName="transform" type="rotate" values="0 70 214;-90 70 214;-90 70 214;0 70 214" dur="5s" begin="0s"/><rect x="64" y="122" width="12" height="92" rx="6" fill="#F87171"/><path d="M64 140h12v14H64zM64 176h12v14H64z" fill="#EEF3FF"/></g></svg>
+<div class="estaciona" style="position:absolute;width:84px;height:50px;box-sizing:border-box;border-radius:14px;background:#00B4D8;box-shadow:0 0 30px rgba(0, 180, 216, 0.7);display:flex;justify-content:flex-end;align-items:center;padding:6px;offset-path:path('M-60 255 H466 Q496 255 496 225 V156');left:0;top:0"><div style="width:16px; height:34px; border-radius:5px; background:#90E0EF;"></div></div>
+<div style="position:absolute; left:120px; top:486px; width:560px; display:flex; flex-direction:column; gap:12px;">
+<div class="check check-osc exito-pop" style="--d:600ms;"><x-icon name="CheckCircle"></x-icon><p class="chk-texto">Reserva de este parqueadero</p></div>
+<div class="check check-osc exito-pop" style="--d:750ms;"><x-icon name="CheckCircle"></x-icon><p class="chk-texto">Dentro de su horario</p></div>
+<div class="check check-osc exito-pop" style="--d:900ms;"><x-icon name="CheckCircle"></x-icon><p class="chk-texto">Sin usar, cancelar ni vencer</p></div>
+<div class="check check-osc exito-pop" style="--d:1050ms;"><x-icon name="CheckCircle"></x-icon><p class="chk-texto">Con cupo disponible</p></div>
+</div>
+</div>
+<div class="pie"><p class="pie-texto">ParkNow · El producto</p><p class="pie-num"></p></div>
+
+</section>
+<section id="valor" class="con-pie" data-transition="fade">
+<x-shape kind="ellipse" class="orbe f" style="left:760px; top:300px; width:400px; height:400px; opacity:0.16;"></x-shape>
+<div class="col" style="gap:56px;">
+<div class="encabezado">
+<p class="ceja a">POR QUÉ PARKNOW</p>
+<h2 class="titulo a" style="--i:1;">Gana el conductor, gana el parqueadero</h2>
+</div>
+<div class="fila" style="gap:40px;">
+<div class="tarjeta z" style="--i:2; padding:48px; gap:24px;">
+<div class="icono"><x-icon name="Users"></x-icon></div>
+<p class="sub">Para conductores</p>
+<div class="check check-osc"><x-icon name="Check"></x-icon><p class="chk-texto">Llega con el cupo asegurado</p></div>
+<div class="check check-osc"><x-icon name="Check"></x-icon><p class="chk-texto">Precio claro antes de pagar</p></div>
+<div class="check check-osc"><x-icon name="Check"></x-icon><p class="chk-texto">Entrada sin tiquetes: solo el QR</p></div>
+<div class="check check-osc"><x-icon name="Check"></x-icon><p class="chk-texto">Recordatorio 10 minutos antes</p></div>
+</div>
+<div class="tarjeta z" style="--i:3; padding:48px; gap:24px;">
+<div class="icono"><x-icon name="Home"></x-icon></div>
+<p class="sub">Para parqueaderos</p>
+<div class="check check-osc"><x-icon name="Check"></x-icon><p class="chk-texto">Ocupación visible en tiempo real</p></div>
+<div class="check check-osc"><x-icon name="Check"></x-icon><p class="chk-texto">Entradas validadas, sin códigos repetidos</p></div>
+<div class="check check-osc"><x-icon name="Check"></x-icon><p class="chk-texto">Menos filas en la entrada</p></div>
+<div class="check check-osc"><x-icon name="Check"></x-icon><p class="chk-texto">Clientes que llegan desde la app</p></div>
+</div>
+</div>
+</div>
+<div class="pie"><p class="pie-texto">ParkNow · El producto</p><p class="pie-num"></p></div>
+
+</section>
+<section id="detras" class="acento" data-transition="fade">
+<x-shape kind="ellipse" class="orbe f" style="left:1100px; top:120px; width:760px; height:760px; opacity:0.16;"></x-shape>
+<div class="col" style="gap:44px; padding-top:60px;">
+<p class="ceja a">DETRÁS DE PARKNOW</p>
+<h2 class="hero a" style="--i:1; width:1500px; font-size:104px;">Se siente como una app nativa, porque lo&#160;es.</h2>
+<p class="cuerpo a" style="--i:2; width:1300px;">Usa de verdad el GPS, la cámara, la huella, los sensores y las notificaciones del celular, con animaciones fluidas en cada toque.</p>
+<div class="fila a" style="--i:4; gap:20px; width:1600px;">
+<div class="tarjeta" style="padding:24px 28px;"><p class="t-titulo">React Native + Expo</p></div>
+<div class="tarjeta" style="padding:24px 28px;"><p class="t-titulo">Un código, Android e iOS</p></div>
+<div class="tarjeta" style="padding:24px 28px;"><p class="t-titulo">Sin servidor ni llaves</p></div>
+</div>
+</div>
+
+</section>
+<section id="ubicacion" class="con-pie" data-transition="push">
+<div class="texto-f">
+<p class="ceja a">UBICACIÓN · GPS</p>
+<h2 class="titulo a" style="--i:1;">Sabe dónde estás</h2>
+<p class="cuerpo a" style="--i:2;">Muestra primero los parqueaderos más cercanos y a cuántos metros están.</p>
+<div class="apoyo a" style="--i:3;">
+<div class="apoyo-item"><p class="apoyo-et">CÓMO SE HIZO</p><p class="apoyo-tx">expo-location pide permiso y lee la posición. La distancia sale de la fórmula de haversine. El mapa es Leaflet con OpenStreetMap.</p></div>
+<div class="apoyo-item"><p class="apoyo-et">DÓNDE ESTÁ</p><p class="apoyo-tx">Pestañas Inicio y Mapa · hooks/use-ubicacion.ts</p></div>
+</div>
+</div>
+<div class="escenario z" style="--i:2; background:#0A1430;">
+<svg aria-label="Mapa de calles" style="position:absolute; left:0px; top:0px;" width="792" height="770" viewBox="0 0 792 770"><rect width="792" height="770" fill="#0A1430"/><path fill="#101C3D" d="M20 20h170v150H20zM220 20h200v150H220zM450 20h150v150H450zM630 20h150v150H630zM20 200h170v170H20zM450 200h150v170H450zM630 200h150v170H630zM20 400h170v160H20zM220 400h200v160H220zM630 400h150v160H630zM20 590h170v170H20zM220 590h200v170H220zM450 590h150v170H450zM630 590h150v170H630z"/><path fill="#12382F" d="M220 200h200v170H220zM450 400h150v160H450z"/><path stroke="#2A3F73" stroke-width="16" fill="none" d="M0 740L792 60"/><path stroke="#1C2A50" stroke-width="8" fill="none" d="M0 185h792M0 385h792M0 575h792M205 0v770M435 0v770M615 0v770"/></svg>
+<div class="pulso" style="position:absolute; left:336px; top:360px; width:120px; height:120px; box-sizing:border-box; border-radius:60px; border:4px solid #00B4D8;"></div>
+<div style="position:absolute; left:380px; top:404px; width:32px; height:32px; box-sizing:border-box; border-radius:16px; background:#00B4D8; border:5px solid #EEF3FF; box-shadow:0 0 30px rgba(0, 180, 216, 0.8);"></div>
+<p class="pin-mapa caer" style="--i:1; left:150px; top:230px;">● 350 m</p>
+<p class="pin-mapa caer" style="--i:2; left:470px; top:150px; background:#C2410C;">● 550 m</p>
+<p class="pin-mapa caer" style="--i:3; left:500px; top:610px;">● 1,2 km</p>
+<p class="pin-mapa caer" style="--i:4; left:90px; top:520px; background:#6B7280;">● Lleno</p>
+<p class="f" style="position:absolute; left:290px; top:500px; width:220px; text-align:center; font-size:24px; font-weight:700; color:#90E0EF;">Tú estás aquí</p>
+</div>
+<div class="pie"><p class="pie-texto">ParkNow · Funciones</p><p class="pie-num"></p></div>
+
+</section>
+<section id="camara" class="con-pie" data-transition="push">
+<div class="texto-f">
+<p class="ceja a">CÁMARA Y LINTERNA</p>
+<h2 class="titulo a" style="--i:1;">Lee el QR, incluso a oscuras</h2>
+<p class="cuerpo a" style="--i:2;">El parqueadero escanea el código del conductor y prende la linterna en sótanos o de noche.</p>
+<div class="apoyo a" style="--i:3;">
+<div class="apoyo-item"><p class="apoyo-et">CÓMO SE HIZO</p><p class="apoyo-tx">CameraView de expo-camera, configurado para leer solo QR. La linterna se activa con enableTorch.</p></div>
+<div class="apoyo-item"><p class="apoyo-et">DÓNDE ESTÁ</p><p class="apoyo-tx">Administrador › Escanear · app/(admin)/escanear.tsx</p></div>
+</div>
+</div>
+<div class="escenario z" style="--i:2; background:#050916;">
+<x-shape kind="ellipse" class="luz" style="position:absolute; left:96px; top:20px; width:600px; height:600px; background:#FFF4C2; opacity:0.5; filter:blur(20px);"></x-shape>
+<div class="qr-luz" style="position:absolute; left:246px; top:110px; width:300px; height:300px; box-sizing:border-box; padding:18px; border-radius:24px; background:#FBFCFF;">
+<svg aria-label="Código QR" width="264" height="264" viewBox="0 0 21 21" shape-rendering="crispEdges"><path fill="#0B1630" d="M0 0h7v1h-7zM8 0h2v1h-2zM11 0h1v1h-1zM14 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h2v1h-2zM11 1h2v1h-2zM14 1h1v1h-1zM20 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h3v1h-3zM12 2h1v1h-1zM14 2h1v1h-1zM16 2h3v1h-3zM20 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM12 3h1v1h-1zM14 3h1v1h-1zM16 3h3v1h-3zM20 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM9 4h1v1h-1zM11 4h2v1h-2zM14 4h1v1h-1zM16 4h3v1h-3zM20 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h2v1h-2zM11 5h1v1h-1zM14 5h1v1h-1zM20 5h1v1h-1zM0 6h7v1h-7zM9 6h1v1h-1zM11 6h2v1h-2zM14 6h7v1h-7zM8 7h1v1h-1zM10 7h2v1h-2zM0 8h2v1h-2zM4 8h1v1h-1zM9 8h1v1h-1zM11 8h2v1h-2zM14 8h1v1h-1zM16 8h1v1h-1zM0 9h1v1h-1zM4 9h1v1h-1zM7 9h1v1h-1zM9 9h1v1h-1zM14 9h2v1h-2zM17 9h4v1h-4zM0 10h1v1h-1zM2 10h3v1h-3zM6 10h2v1h-2zM12 10h3v1h-3zM17 10h4v1h-4zM2 11h4v1h-4zM12 11h1v1h-1zM17 11h3v1h-3zM0 12h11v1h-11zM13 12h5v1h-5zM20 12h1v1h-1zM9 13h4v1h-4zM14 13h2v1h-2zM18 13h1v1h-1zM20 13h1v1h-1zM0 14h7v1h-7zM12 14h3v1h-3zM18 14h2v1h-2zM0 15h1v1h-1zM6 15h1v1h-1zM13 15h1v1h-1zM15 15h5v1h-5zM0 16h1v1h-1zM2 16h3v1h-3zM6 16h1v1h-1zM9 16h1v1h-1zM13 16h5v1h-5zM0 17h1v1h-1zM2 17h3v1h-3zM6 17h1v1h-1zM8 17h1v1h-1zM11 17h1v1h-1zM16 17h2v1h-2zM19 17h1v1h-1zM0 18h1v1h-1zM2 18h3v1h-3zM6 18h1v1h-1zM9 18h2v1h-2zM13 18h3v1h-3zM18 18h1v1h-1zM0 19h1v1h-1zM6 19h1v1h-1zM9 19h1v1h-1zM11 19h2v1h-2zM17 19h1v1h-1zM20 19h1v1h-1zM0 20h7v1h-7zM8 20h3v1h-3zM12 20h3v1h-3zM16 20h2v1h-2zM20 20h1v1h-1z"/></svg>
+</div>
+<div class="esquina-qr" style="left:226px; top:90px; border-top-width:6px; border-left-width:6px; border-top-left-radius:22px;"></div>
+<div class="esquina-qr" style="left:510px; top:90px; border-top-width:6px; border-right-width:6px; border-top-right-radius:22px;"></div>
+<div class="esquina-qr" style="left:226px; top:374px; border-bottom-width:6px; border-left-width:6px; border-bottom-left-radius:22px;"></div>
+<div class="esquina-qr" style="left:510px; top:374px; border-bottom-width:6px; border-right-width:6px; border-bottom-right-radius:22px;"></div>
+<div class="laser" style="position:absolute; left:236px; top:118px; width:320px; height:6px; border-radius:3px; background:#00B4D8; box-shadow:0 0 24px rgba(0, 180, 216, 0.9);"></div>
+<div class="boton-luz" style="position:absolute; left:348px; top:520px; width:96px; height:96px; box-sizing:border-box; border-radius:48px; background:#FFF4C2; display:flex; align-items:center; justify-content:center;"><x-icon name="Lightbulb" style="width:44px; height:44px; color:#03045E;"></x-icon></div>
+<p style="position:absolute; left:246px; top:636px; width:300px; text-align:center; font-size:24px; font-weight:700; color:#EEF3FF;">Linterna encendida</p>
+</div>
+<div class="pie"><p class="pie-texto">ParkNow · Funciones</p><p class="pie-num"></p></div>
+
+</section>
+<section id="huella" class="con-pie" data-transition="push">
+<div class="texto-f">
+<p class="ceja a">BIOMETRÍA</p>
+<h2 class="titulo a" style="--i:1;">Tu huella es tu firma</h2>
+<p class="cuerpo a" style="--i:2;">Confirma cada pago con la huella o Face ID, y entra a la app sin escribir la contraseña.</p>
+<div class="apoyo a" style="--i:3;">
+<div class="apoyo-item"><p class="apoyo-et">CÓMO SE HIZO</p><p class="apoyo-tx">expo-local-authentication abre el lector del celular. Si no hay biometría, el PIN sirve de respaldo.</p></div>
+<div class="apoyo-item"><p class="apoyo-et">DÓNDE ESTÁ</p><p class="apoyo-tx">Al pagar una reserva y en el ingreso · services/biometrics.ts</p></div>
+</div>
+</div>
+<div class="escenario z" style="--i:2;">
+<p class="f" style="position:absolute; left:96px; top:44px; width:600px; text-align:center; font-size:32px; font-weight:700; color:#EEF3FF;">Confirma el pago de $13.000</p>
+<x-shape kind="ellipse" class="f" style="position:absolute; left:216px; top:150px; width:360px; height:360px; background:#00B4D8; opacity:0.12; filter:blur(20px);"></x-shape>
+<svg aria-label="Huella que se llena al leerse" style="position:absolute; left:196px; top:120px;" width="400" height="440" viewBox="0 0 400 440"><g transform="scale(2)"><g fill="none" stroke="#22305A" stroke-width="7" stroke-linecap="round"><path d="M86.8 105.2A14 14 0 1 1 86.8 114.8"/><path d="M74.4 105.5A26 26 0 1 1 80.1 126.7"/><path d="M64.3 97.0A38 38 0 1 1 75.6 139.1"/><path d="M50.2 105.6A50 50 0 1 1 82.9 157.0"/><path d="M40.1 94.0A62 62 0 1 1 94.6 171.8"/><path d="M32.9 78.7A74 74 0 1 1 112.8 182.9"/><path d="M29.6 60.7A86 86 0 1 1 136.3 187.9"/></g><g fill="none" stroke="#00B4D8" stroke-width="7" stroke-linecap="round" stroke-dasharray="100"><path pathLength="100" stroke-dashoffset="0" d="M86.8 105.2A14 14 0 1 1 86.8 114.8"><animate attributeName="stroke-dashoffset" from="100" to="0" dur="1.2s" begin="0s"/></path><path pathLength="100" stroke-dashoffset="0" d="M74.4 105.5A26 26 0 1 1 80.1 126.7"><animate attributeName="stroke-dashoffset" from="100" to="0" dur="1.4s" begin="0s"/></path><path pathLength="100" stroke-dashoffset="0" d="M64.3 97.0A38 38 0 1 1 75.6 139.1"><animate attributeName="stroke-dashoffset" from="100" to="0" dur="1.6s" begin="0s"/></path><path pathLength="100" stroke-dashoffset="0" d="M50.2 105.6A50 50 0 1 1 82.9 157.0"><animate attributeName="stroke-dashoffset" from="100" to="0" dur="1.8s" begin="0s"/></path><path pathLength="100" stroke-dashoffset="0" d="M40.1 94.0A62 62 0 1 1 94.6 171.8"><animate attributeName="stroke-dashoffset" from="100" to="0" dur="2.0s" begin="0s"/></path><path pathLength="100" stroke-dashoffset="0" d="M32.9 78.7A74 74 0 1 1 112.8 182.9"><animate attributeName="stroke-dashoffset" from="100" to="0" dur="2.2s" begin="0s"/></path><path pathLength="100" stroke-dashoffset="0" d="M29.6 60.7A86 86 0 1 1 136.3 187.9"><animate attributeName="stroke-dashoffset" from="100" to="0" dur="2.4s" begin="0s"/></path></g></g></svg>
+<div class="exito-chip exito-pop" style="--d:2600ms; left:226px; top:620px;"><x-icon name="CheckCircle" style="width:34px; height:34px; color:#4ADE80;"></x-icon><p class="exito-tx">Pago confirmado</p></div>
+</div>
+<div class="pie"><p class="pie-texto">ParkNow · Funciones</p><p class="pie-num"></p></div>
+
+</section>
+<section id="avisos" class="con-pie" data-transition="push">
+<div class="texto-f">
+<p class="ceja a">NOTIFICACIONES Y VIBRACIÓN</p>
+<h2 class="titulo a" style="--i:1;">Te avisa a tiempo</h2>
+<p class="cuerpo a" style="--i:2;">Confirma la reserva al instante y te recuerda 10 minutos antes de llegar. Cada toque responde con una vibración.</p>
+<div class="apoyo a" style="--i:3;">
+<div class="apoyo-item"><p class="apoyo-et">CÓMO SE HIZO</p><p class="apoyo-tx">expo-notifications programa avisos locales; Android usa su propio canal. expo-haptics vibra distinto al tocar, acertar o fallar.</p></div>
+<div class="apoyo-item"><p class="apoyo-et">DÓNDE ESTÁ</p><p class="apoyo-tx">Al reservar · services/notifications.ts y services/haptics.ts</p></div>
+</div>
+</div>
+<div class="escenario z" style="--i:2;">
+<svg class="ondas" aria-label="" style="position:absolute; left:150px; top:250px;" width="492" height="220" viewBox="0 0 492 220"><g fill="none" stroke="#00B4D8" stroke-width="6" stroke-linecap="round"><path d="M40 40Q10 110 40 180"/><path d="M14 20Q-24 110 14 200"/><path d="M452 40Q482 110 452 180"/><path d="M478 20Q516 110 478 200"/></g></svg>
+<div class="vibra" style="position:absolute; left:226px; top:55px; width:340px; height:660px; box-sizing:border-box; border-radius:52px; border:10px solid #1C2A50; background:linear-gradient(160deg, #03045E 0%, #02368A 60%, #0077B6 100%); display:flex; flex-direction:column; align-items:center; padding-top:70px; gap:4px;">
+<p style="font-size:72px; font-weight:800; color:#FFFFFF;">11:30</p>
+<p style="font-size:24px; color:#D3E9F7;">martes, 17 de noviembre</p>
+</div>
+<div class="notif llega" style="--i:0; left:196px; top:290px; width:400px;"><div class="icono" style="width:56px; height:56px; border-radius:16px; background:#02368A;"><x-icon name="Check" style="width:30px; height:30px; color:#FFFFFF;"></x-icon></div><div class="col" style="gap:2px; flex:1;"><p class="notif-t">Reserva confirmada</p><p class="notif-x">Muestra el QR al llegar.</p></div></div>
+<div class="notif llega" style="--i:1; left:196px; top:430px; width:400px;"><div class="icono" style="width:56px; height:56px; border-radius:16px; background:#02368A;"><x-icon name="Clock" style="width:30px; height:30px; color:#FFFFFF;"></x-icon></div><div class="col" style="gap:2px; flex:1;"><p class="notif-t">Empieza en 10 min</p><p class="notif-x">Ten listo tu QR.</p></div></div>
+</div>
+<div class="pie"><p class="pie-texto">ParkNow · Funciones</p><p class="pie-num"></p></div>
+
+</section>
+<section id="agitar" class="con-pie" data-transition="push">
+<div class="texto-f">
+<p class="ceja a">SENSOR · ACELERÓMETRO</p>
+<h2 class="titulo a" style="--i:1;">Agita y se actualiza</h2>
+<p class="cuerpo a" style="--i:2;">Una sacudida del celular refresca los cupos al instante, sin buscar ningún botón.</p>
+<div class="apoyo a" style="--i:3;">
+<div class="apoyo-item"><p class="apoyo-et">CÓMO SE HIZO</p><p class="apoyo-tx">expo-sensors lee el acelerómetro cada 100 ms. Si la fuerza total pasa de 1,9 g, actualiza los cupos y vibra.</p></div>
+<div class="apoyo-item"><p class="apoyo-et">DÓNDE ESTÁ</p><p class="apoyo-tx">Pestaña Inicio · hooks/use-agitar.ts</p></div>
+</div>
+</div>
+<div class="escenario z" style="--i:2;">
+<svg class="ondas" aria-label="" style="position:absolute; left:130px; top:250px;" width="532" height="260" viewBox="0 0 532 260"><g fill="none" stroke="#00B4D8" stroke-width="6" stroke-linecap="round"><path d="M40 40Q6 130 40 220"/><path d="M12 14Q-30 130 12 246"/><path d="M492 40Q526 130 492 220"/><path d="M520 14Q562 130 520 246"/></g></svg>
+<div class="exito-chip exito-pop" style="--d:2200ms; left:560px; top:40px; padding:12px 22px;"><p class="exito-tx">1,9 g</p></div>
+</div>
+<div class="telefono sacudir" style="left:1206px; top:170px; height:690px;">
+<div class="tel-cab"><p class="tel-saludo">Desliza o agita</p><p class="tel-nombre">Cupos en vivo</p></div>
+<div class="exito-pop" style="--d:2200ms; display:flex; align-items:center; gap:12px; background:rgba(74, 222, 128, 0.14); border-radius:22px; padding:16px 18px;"><x-icon name="CheckCircle" style="width:30px; height:30px; color:#4ADE80;"></x-icon><p style="font-size:24px; font-weight:700; color:#4ADE80;">Cupos actualizados</p></div>
+<div class="tel-tarjeta"><p class="tel-lugar">Parqueadero Calle 72</p><div class="tel-fila"><p class="pildora p-alta">● 19 libres</p><p class="tel-precio">$6.500</p></div></div>
+<div class="tel-tarjeta"><p class="tel-lugar">Av. Chile</p><div class="tel-fila"><p class="pildora p-baja">● 9 libres</p><p class="tel-precio">$7.000</p></div></div>
+<div class="tel-barra"><x-icon name="Home" class="activo"></x-icon><x-icon name="Globe"></x-icon><x-icon name="Clock"></x-icon><x-icon name="Users"></x-icon></div>
+</div>
+<div class="pie"><p class="pie-texto">ParkNow · Funciones</p><p class="pie-num"></p></div>
+
+</section>
+<section id="botones" class="con-pie" data-transition="push">
+<div class="texto-f">
+<p class="ceja a">ANIMACIÓN · BOTONES</p>
+<h2 class="titulo a" style="--i:1;">Botones que responden</h2>
+<p class="cuerpo a" style="--i:2;">Cada botón se encoge al tocarlo y vuelve con rebote, con una vibración suave: la app se siente viva.</p>
+<div class="apoyo a" style="--i:3;">
+<div class="apoyo-item"><p class="apoyo-et">CÓMO SE HIZO</p><p class="apoyo-tx">Un componente propio con Reanimated: al presionar baja a 0,96 con withSpring y al soltar rebota a 1.</p></div>
+<div class="apoyo-item"><p class="apoyo-et">DÓNDE ESTÁ</p><p class="apoyo-tx">En todos los botones y tarjetas · components/ui/pressable-scale.tsx</p></div>
+</div>
+</div>
+<div class="escenario z" style="--i:2;">
+<div class="onda-btn" style="position:absolute; left:186px; top:220px; width:420px; height:120px; box-sizing:border-box; border-radius:60px; border:4px solid #00B4D8;"></div>
+<div class="presiona" style="position:absolute; left:186px; top:220px; width:420px; height:120px; box-sizing:border-box; border-radius:60px; background:linear-gradient(135deg, #0077B6 0%, #02368A 100%); display:flex; align-items:center; justify-content:center; gap:16px; box-shadow:0 20px 50px rgba(0, 119, 182, 0.45);"><x-icon name="Check" style="width:40px; height:40px; color:#FFFFFF;"></x-icon><p style="font-size:36px; font-weight:800; color:#FFFFFF;">Pagar $13.000</p></div>
+<div style="position:absolute; left:116px; top:460px; width:560px; display:flex; justify-content:center; gap:20px;">
+<p class="pildora presiona" style="animation-delay:900ms; background:#0077B6; color:#FFFFFF; padding:14px 26px;">En 30 min</p>
+<p class="pildora presiona" style="animation-delay:1200ms; background:#16213F; color:#EEF3FF; padding:14px 26px;">En 1 hora</p>
+<div class="presiona" style="animation-delay:1500ms; width:64px; height:64px; border-radius:32px; background:#16213F; display:flex; align-items:center; justify-content:center;"><x-icon name="Star" style="width:32px; height:32px; color:#F87171;"></x-icon></div>
+</div>
+<p class="f" style="position:absolute; left:96px; top:600px; width:600px; text-align:center; font-size:24px; color:#9AA8C4;">escala 1 → 0,96 → 1, con resorte</p>
+</div>
+<div class="pie"><p class="pie-texto">ParkNow · Funciones</p><p class="pie-num"></p></div>
+
+</section>
+<section id="hoja" class="con-pie" data-transition="push">
+<div class="texto-f">
+<p class="ceja a">ANIMACIÓN · GESTO PAN</p>
+<h2 class="titulo a" style="--i:1;">Una hoja que sigue tu dedo</h2>
+<p class="cuerpo a" style="--i:2;">El detalle del parqueadero sube desde abajo. Si la arrastras hacia abajo, se cierra; si no, vuelve a su sitio.</p>
+<div class="apoyo a" style="--i:3;">
+<div class="apoyo-item"><p class="apoyo-et">CÓMO SE HIZO</p><p class="apoyo-tx">Gesture Handler detecta el gesto Pan y Reanimated mueve la hoja. Se cierra si bajas más de 120 px o la lanzas rápido.</p></div>
+<div class="apoyo-item"><p class="apoyo-et">DÓNDE ESTÁ</p><p class="apoyo-tx">Al tocar un parqueadero · components/ui/bottom-sheet.tsx</p></div>
+</div>
+</div>
+<div class="escenario z" style="--i:2; background:#0A1430;">
+<svg aria-label="" style="position:absolute; left:0px; top:0px;" width="792" height="770" viewBox="0 0 792 770" opacity="0.5"><path fill="#101C3D" d="M20 20h170v150H20zM220 20h200v150H220zM450 20h320v150H450zM20 200h170v170H20zM450 200h320v170H450zM20 400h400v160H20zM450 400h320v160H450z"/><path fill="#12382F" d="M220 200h200v170H220z"/><path stroke="#1C2A50" stroke-width="8" fill="none" d="M0 185h792M0 385h792M205 0v770M435 0v770"/></svg>
+<p class="pin-mapa" style="left:300px; top:110px;">● $6.500</p>
+<div class="hoja-mueve" style="position:absolute; left:36px; top:300px; width:720px; height:500px; box-sizing:border-box; border-radius:40px; background:#060B1E; border:1px solid #22305A; padding:22px 40px; display:flex; flex-direction:column; gap:18px; box-shadow:0 -24px 60px rgba(0, 0, 0, 0.45);">
+<div style="align-self:center; width:90px; height:10px; border-radius:5px; background:#22305A;"></div>
+<p style="font-size:36px; font-weight:800; color:#EEF3FF;">Parqueadero Calle 72</p>
+<div style="display:flex; gap:12px;"><p class="pildora p-alta">● Hay cupos</p><p class="pildora" style="background:#16213F; color:#9AA8C4;">Cubierto</p></div>
+<div style="height:72px; border-radius:36px; background:linear-gradient(135deg, #0077B6 0%, #02368A 100%); display:flex; align-items:center; justify-content:center;"><p style="font-size:28px; font-weight:800; color:#FFFFFF;">Pagar $13.000</p></div>
+</div>
+<div class="dedo" style="position:absolute; left:368px; top:296px; width:56px; height:56px; border-radius:28px; background:#EEF3FF; box-shadow:0 0 0 12px rgba(238, 243, 255, 0.18);"></div>
+</div>
+<div class="pie"><p class="pie-texto">ParkNow · Funciones</p><p class="pie-num"></p></div>
+
+</section>
+<section id="movimiento" class="con-pie" data-transition="push">
+<div class="texto-f">
+<p class="ceja a">ANIMACIÓN · NAVEGACIÓN</p>
+<h2 class="titulo a" style="--i:1;">Movimiento en cada detalle</h2>
+<p class="cuerpo a" style="--i:2;">El indicador viaja a la pestaña activa, las listas entran escalonadas y el panel dibuja la ocupación.</p>
+<div class="apoyo a" style="--i:3;">
+<div class="apoyo-item"><p class="apoyo-et">CÓMO SE HIZO</p><p class="apoyo-tx">Reanimated: withSpring para el indicador, 60 ms de retraso entre tarjetas y un anillo SVG que se llena.</p></div>
+<div class="apoyo-item"><p class="apoyo-et">DÓNDE ESTÁ</p><p class="apoyo-tx">navigation/tab-bar.tsx · parking/parking-card.tsx · app/(admin)/panel.tsx</p></div>
+</div>
+</div>
+<div class="escenario z" style="--i:2;">
+<div style="position:absolute; left:46px; top:60px; width:700px; height:96px; box-sizing:border-box; border-radius:48px; background:#16213F;"></div>
+<div class="indicador" style="position:absolute; left:56px; top:70px; width:170px; height:76px; border-radius:38px; background:#02368A;"></div>
+<p style="position:absolute; left:56px; top:90px; width:170px; text-align:center; font-size:24px; font-weight:700; color:#EEF3FF;">Inicio</p>
+<p style="position:absolute; left:226px; top:90px; width:170px; text-align:center; font-size:24px; font-weight:700; color:#EEF3FF;">Mapa</p>
+<p style="position:absolute; left:396px; top:90px; width:170px; text-align:center; font-size:24px; font-weight:700; color:#EEF3FF;">Reservas</p>
+<p style="position:absolute; left:566px; top:90px; width:170px; text-align:center; font-size:24px; font-weight:700; color:#EEF3FF;">Perfil</p>
+<div class="tel-tarjeta a" style="--i:4; position:absolute; left:46px; top:230px; width:340px; box-sizing:border-box;"><p class="tel-lugar">Calle 72</p><p class="pildora p-alta" style="align-self:flex-start;">● Hay cupos</p></div>
+<div class="tel-tarjeta a" style="--i:6; position:absolute; left:46px; top:386px; width:340px; box-sizing:border-box;"><p class="tel-lugar">Av. Chile</p><p class="pildora p-baja" style="align-self:flex-start;">● Pocos cupos</p></div>
+<div class="tel-tarjeta a" style="--i:8; position:absolute; left:46px; top:542px; width:340px; box-sizing:border-box;"><p class="tel-lugar">Zona T</p><p class="pildora p-llena" style="align-self:flex-start;">● Lleno</p></div>
+<svg aria-label="Medidor circular de ocupación al 68 %" style="position:absolute; left:426px; top:250px;" width="320" height="320" viewBox="0 0 320 320"><circle cx="160" cy="160" r="130" fill="none" stroke="#16213F" stroke-width="26"/><circle cx="160" cy="160" r="130" fill="none" stroke="#00B4D8" stroke-width="26" stroke-linecap="round" stroke-dasharray="816.8" stroke-dashoffset="261.4" transform="rotate(-90 160 160)"><animate attributeName="stroke-dashoffset" from="816.8" to="261.4" dur="1.8s" begin="0s"/></circle></svg>
+<p style="position:absolute; left:426px; top:358px; width:320px; text-align:center; font-size:64px; font-weight:800; color:#EEF3FF;">68%</p>
+<p style="position:absolute; left:426px; top:438px; width:320px; text-align:center; font-size:24px; color:#9AA8C4;">ocupado</p>
+</div>
+<div class="pie"><p class="pie-texto">ParkNow · Funciones</p><p class="pie-num"></p></div>
+
+</section>
+<section id="seguridad" class="con-pie" data-transition="fade">
+<div class="texto-f">
+<p class="ceja a">SEGURIDAD Y PLATAFORMA</p>
+<h2 class="titulo a" style="--i:1;">Segura y a la medida de tu celular</h2>
+<p class="cuerpo a" style="--i:2;">Tu sesión queda cifrada en el equipo, y la app se adapta sola a Android y a iPhone.</p>
+<div class="apoyo a" style="--i:3;">
+<div class="apoyo-item"><p class="apoyo-et">CÓMO SE HIZO</p><p class="apoyo-tx">expo-secure-store guarda la sesión en el Keystore o el Llavero. Con Platform.OS cambian la biometría, los mapas y el botón atrás.</p></div>
+<div class="apoyo-item"><p class="apoyo-et">DÓNDE ESTÁ</p><p class="apoyo-tx">services/storage.ts · comentarios «Validación de plataforma»</p></div>
+</div>
+</div>
+<div class="escenario z" style="--i:2;">
+<x-shape kind="ellipse" class="f" style="position:absolute; left:46px; top:170px; width:320px; height:320px; background:#00B4D8; opacity:0.12; filter:blur(20px);"></x-shape>
+<div class="argolla" style="position:absolute; left:136px; top:150px; width:140px; height:150px; box-sizing:border-box; border-radius:70px; border:18px solid #4CC9F0; border-bottom-width:0px;"></div>
+<div class="resalta" style="--d:1400ms; position:absolute; left:96px; top:250px; width:220px; height:190px; box-sizing:border-box; border-radius:36px; background:linear-gradient(135deg, #0077B6 0%, #02368A 100%); border:3px solid #22305A; display:flex; align-items:center; justify-content:center;"><x-icon name="Key" style="width:56px; height:56px; color:#EEF3FF;"></x-icon></div>
+<p class="f" style="position:absolute; left:56px; top:470px; width:300px; text-align:center; font-size:28px; font-weight:800; color:#EEF3FF;">Sesión cifrada</p>
+<div class="tarjeta a" style="--i:5; position:absolute; left:410px; top:110px; width:340px; padding:28px; gap:10px; background:#16213F;"><p class="t-titulo">iPhone</p><p class="t-texto">Face ID</p><p class="t-texto">Apple Maps</p><p class="t-texto">Llavero</p></div>
+<div class="tarjeta a" style="--i:7; position:absolute; left:410px; top:410px; width:340px; padding:28px; gap:10px; background:#16213F; border:1px solid #00B4D8;"><p class="t-titulo">Android</p><p class="t-texto">Huella</p><p class="t-texto">Google Maps</p><p class="t-texto">Keystore · botón atrás</p></div>
+</div>
+<div class="pie"><p class="pie-texto">ParkNow · Funciones</p><p class="pie-num"></p></div>
+
+</section>
+<section id="demo" class="acento">
+<x-shape kind="ellipse" class="orbe f" style="left:1120px; top:60px; width:760px; height:760px; opacity:0.18;"></x-shape>
+<div class="col" style="gap:44px; padding-top:20px;">
+<p class="ceja a">DEMO EN VIVO</p>
+<h2 class="hero a" style="--i:1; width:1400px;">Ahora, véanla funcionar.</h2>
+<div class="fila" style="gap:28px; width:1240px;">
+<div class="tarjeta z" style="--i:3;"><div class="icono" style="background:rgba(144, 224, 239, 0.18);"><x-icon name="Users" style="color:#90E0EF;"></x-icon></div><p class="t-titulo">Conductor</p><p class="t-texto">conductor@parknow.co · 123456</p></div>
+<div class="tarjeta z" style="--i:4;"><div class="icono" style="background:rgba(144, 224, 239, 0.18);"><x-icon name="Home" style="color:#90E0EF;"></x-icon></div><p class="t-titulo">Administrador</p><p class="t-texto">admin@parknow.co · admin123</p></div>
+</div>
+<p class="sub a" style="--i:6; margin-top:24px;">¡Gracias! <span class="cian">¿Preguntas?</span></p>
+</div>
+
+</section>
+</div>
+<div id="barra"></div>
+<div id="ayuda">← → para avanzar · F pantalla completa</div>
+<script>
+const ICONOS = {"Search": "<circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/>", "Warning": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/>", "Clock": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 6v6l4 2\"/>", "Chart": "<path d=\"M3 3v18h18\"/><path d=\"M18 17V9\"/><path d=\"M13 17V5\"/><path d=\"M8 17v-3\"/>", "Lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\"/><path d=\"M9 18h6\"/><path d=\"M10 22h4\"/>", "Users": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M22 21v-2a4 4 0 0 0-3-3.87\"/><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"/>", "Home": "<path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/><path d=\"M9 22V12h6v10\"/>", "Globe": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M2 12h20\"/><path d=\"M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z\"/>", "Key": "<circle cx=\"7.5\" cy=\"15.5\" r=\"5.5\"/><path d=\"m21 2-9.6 9.6\"/><path d=\"m15.5 7.5 3 3L22 7l-3-3\"/>", "Chat": "<path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\"/>", "Lock": "<rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/>", "Star": "<path d=\"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z\"/>", "Check": "<path d=\"M20 6 9 17l-5-5\"/>", "CheckCircle": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m9 12 2 2 4-4\"/>", "Activity": "<path d=\"M22 12h-4l-3 9L9 3l-3 9H2\"/>", "Cloud": "<path d=\"M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z\"/>"};
+const escena = document.getElementById('escena');
+
+function pintarIconos(raiz) {
+  raiz.querySelectorAll('x-icon').forEach((el) => {
+    if (el.firstChild) return;
+    el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (ICONOS[el.getAttribute('name')] || '') + '</svg>';
+  });
+}
+
+// Se guarda una copia limpia de cada diapositiva: al volver a mostrarla se reemplaza por la copia,
+// así las animaciones CSS y SVG arrancan otra vez desde cero.
+const originales = [...escena.children].map((s) => s.cloneNode(true));
+let actual = 0;
+
+function ajustar() {
+  const k = Math.min(innerWidth / 1920, innerHeight / 1080);
+  escena.style.transform = `scale(${k}) translate(-50%, -50%)`;
+}
+
+function ir(n) {
+  const total = originales.length;
+  n = Math.max(0, Math.min(total - 1, n));
+  if (n === actual && escena.children[n].classList.contains('actual')) return;
+  const vieja = escena.children[actual];
+  const tipo = n > actual ? (vieja.dataset.transition || 'fade') : 'fade';
+  const nueva = originales[n].cloneNode(true);
+  pintarIconos(nueva);
+  escena.replaceChild(nueva, escena.children[n]);
+  [...escena.children].forEach((s, i) => { if (i !== n && i !== actual) s.className = s.className.replace(/\b(actual|sale-\w+|entra-\w+)\b/g, '').trim(); });
+  if (n !== actual) {
+    vieja.classList.remove('actual');
+    vieja.classList.add(tipo === 'push' ? 'sale-push' : 'sale-fade');
+    setTimeout(() => vieja.classList.remove('sale-push', 'sale-fade'), 750);
+    if (tipo === 'push') { nueva.classList.add('entra-push'); void nueva.offsetWidth; nueva.classList.remove('entra-push'); }
+  }
+  nueva.classList.add('actual');
+  actual = n;
+  history.replaceState(null, '', '#' + (n + 1));
+  document.getElementById('barra').style.width = ((n + 1) / total * 100) + '%';
+}
+
+addEventListener('keydown', (e) => {
+  if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); ir(actual + 1); }
+  else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); ir(actual - 1); }
+  else if (e.key === 'Home') ir(0);
+  else if (e.key === 'End') ir(originales.length - 1);
+  else if (e.key === 'f' || e.key === 'F') {
+    if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen();
+  }
+});
+addEventListener('click', (e) => { if (e.clientX < innerWidth * 0.25) ir(actual - 1); else ir(actual + 1); });
+addEventListener('resize', ajustar);
+addEventListener('hashchange', () => { const h = parseInt(location.hash.slice(1), 10); if (Number.isFinite(h) && h - 1 !== actual) ir(h - 1); });
+pintarIconos(escena);
+ajustar();
+const inicio = parseInt(location.hash.slice(1), 10);
+actual = Number.isFinite(inicio) ? Math.max(0, Math.min(originales.length - 1, inicio - 1)) : 0;
+ir(actual);
+</script>
+</body>
+</html>
